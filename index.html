@@ -698,29 +698,10 @@
     <div class="bg-image" id="cover-bg" aria-hidden="true"></div>
     <div class="bg-overlay" aria-hidden="true"></div>
     <span class="bg-gl cover-bg-gl" aria-hidden="true">L</span>
+
     <aside class="cover-qr" aria-label="Präsentation am Handy mitverfolgen">
-      <div class="cover-qr-code" aria-hidden="true">
-        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-          <rect width="64" height="64" fill="#EAE3D4" opacity=".08"/>
-          <rect x="4" y="4" width="18" height="18" fill="none" stroke="#C4A882" stroke-width="2"/>
-          <rect x="8" y="8" width="10" height="10" fill="#C4A882"/>
-          <rect x="42" y="4" width="18" height="18" fill="none" stroke="#C4A882" stroke-width="2"/>
-          <rect x="46" y="8" width="10" height="10" fill="#C4A882"/>
-          <rect x="4" y="42" width="18" height="18" fill="none" stroke="#C4A882" stroke-width="2"/>
-          <rect x="8" y="46" width="10" height="10" fill="#C4A882"/>
-          <rect x="28" y="8" width="4" height="4" fill="#C4A882"/>
-          <rect x="36" y="8" width="4" height="4" fill="#C4A882"/>
-          <rect x="28" y="16" width="4" height="4" fill="#C4A882"/>
-          <rect x="32" y="24" width="4" height="4" fill="#C4A882"/>
-          <rect x="40" y="28" width="4" height="4" fill="#C4A882"/>
-          <rect x="48" y="32" width="4" height="4" fill="#C4A882"/>
-          <rect x="28" y="32" width="4" height="4" fill="#C4A882"/>
-          <rect x="36" y="40" width="4" height="4" fill="#C4A882"/>
-          <rect x="44" y="44" width="4" height="4" fill="#C4A882"/>
-          <rect x="52" y="48" width="4" height="4" fill="#C4A882"/>
-          <rect x="28" y="48" width="4" height="4" fill="#C4A882"/>
-          <rect x="36" y="52" width="4" height="4" fill="#C4A882"/>
-        </svg>
+      <div class="cover-qr-code" aria-hidden="true" style="width: 64px; height: 64px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://loom-praesentation.vercel.app&color=080807&bgcolor=EAE3D4" alt="QR Code" style="width: 100%; height: 100%; display: block;">
       </div>
       <div class="cover-qr-text">
         <span class="cover-qr-label">Live mitlesen</span>
