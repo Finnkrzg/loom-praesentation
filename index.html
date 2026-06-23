@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOOM — Österreichische Schurwolle · Quiet Luxury</title>
+  <meta name="description" content="LOOM — handgewebte Teppiche aus 100% österreichischer Schurwolle. Eco-Luxury für den Conscious Aesthete.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       DESIGN SYSTEM
+    ═══════════════════════════════════════════════════════════ */
+    :root {
+      --black:         #080807;
+      --off-black:     #0F0E0D;
+      --charcoal:      #161513;
+      --dark:          #201E1B;
+      --stone:         #38342E;
+      --muted:         #6B6760;
+      --silver:        #9C968B;
+      --light:         #D6D0C4;
+      --cream:         #EAE3D4;
+      --accent:        #C4A882;
+      --accent-bright: #D8BC95;
+      --accent-dark:   #8C7355;
+
+      --font-display:  'Cormorant Garamond', serif;
+      --font-body:     'Inter', sans-serif;
+
+      --text-xl:  clamp(72px, 10vw, 150px);
+      --text-l:   clamp(46px, 6vw, 92px);
+      --text-m:   clamp(30px, 4vw, 54px);
+
+      --pad-v: 140px;
+      --pad-h: 84px;
+      --max-w: 1240px;
+
+      --ease-out:  cubic-bezier(.22,1,.36,1);
+      --ease-io:   cubic-bezier(.76,0,.24,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    html.lenis, html.lenis body { height: auto; }
+    .lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+    body {
+      background: var(--black);
+      color: var(--light);
+      font-family: var(--font-body);
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Grain + subtle vignette */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 8000;
+      background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.014) 1px, transparent 0);
+      background-size: 3px 3px;
+      mix-blend-mode: overlay;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 7999;
+      box-shadow: inset 0 0 220px 40px rgba(0,0,0,.55);
+    }
+
+    ::selection { background: var(--accent); color: var(--black); }
+
+    /* ── Focus (a11y) ── */
+    a:focus-visible, button:focus-visible, .dot:focus-visible {
+      outline: 2px solid var(--accent-bright);
+      outline-offset: 4px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       PRELOADER
+    ═══════════════════════════════════════════════════════════ */
+    #loader {
+      position: fixed; inset: 0; z-index: 10000;
+      background: var(--black);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 38px;
+    }
+    .loader-weave { width: min(340px, 64vw); height: 56px; }
+    .loader-weave path { fill: none; stroke: var(--accent); stroke-width: 1; }
+    .loader-brand {
+      font-family: var(--font-display);
+      font-size: 22px; font-weight: 600;
+      letter-spacing: .58em; text-indent: .58em;
+      color: var(--cream); opacity: 0;
+    }
+    .loader-count {
+      position: absolute; bottom: 40px; right: 44px;
+      font-family: var(--font-display);
+      font-size: clamp(56px, 9vw, 120px); font-weight: 600;
+      color: var(--stone); line-height: 1; user-select: none;
+    }
+    .loader-sub {
+      position: absolute; bottom: 48px; left: 44px;
+      font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--muted); opacity: 0;
+    }
+    .loader-curtain {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--off-black);
+      transform: scaleY(0); transform-origin: bottom;
+      pointer-events: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       THREE.JS CANVAS
+    ═══════════════════════════════════════════════════════════ */
+    #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* ═══════════════════════════════════════════════════════════
+       CURSOR
+    ═══════════════════════════════════════════════════════════ */
+    .cursor-dot {
+      position: fixed; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); pointer-events: none; z-index: 9990;
+      transform: translate(-50%, -50%);
+      transition: width .25s, height .25s, opacity .25s, background .25s;
+      mix-blend-mode: difference;
+    }
+    .cursor-ring {
+      position: fixed; width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid rgba(196,168,130,.35); pointer-events: none; z-index: 9989;
+      transform: translate(-50%, -50%);
+      transition: width .3s var(--ease-out), height .3s var(--ease-out), border-color .3s;
+    }
+    .cursor-label {
+      position: fixed; z-index: 9991; pointer-events: none;
+      font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--black); background: var(--accent);
+      padding: 4px 9px; border-radius: 2px;
+      transform: translate(-50%,-50%) scale(0); transform-origin: center;
+      transition: transform .25s var(--ease-out);
+      white-space: nowrap;
+    }
+    body.c-hover .cursor-dot  { width: 0; height: 0; opacity: 0; }
+    body.c-hover .cursor-ring { width: 56px; height: 56px; border-color: rgba(196,168,130,.6); }
+    body.c-drag  .cursor-ring { width: 78px; height: 78px; }
+    body.c-drag  .cursor-label { transform: translate(-50%,-50%) scale(1); }
+
+    /* ═══════════════════════════════════════════════════════════
+       SCROLL PROGRESS — "der Faden" (Top Bar)
+    ═══════════════════════════════════════════════════════════ */
+    .thread {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 3px; z-index: 10100;
+      background: rgba(56, 52, 46, 0.4);
+    }
+    .thread-fill {
+      position: absolute; inset: 0; background: var(--accent);
+      transform: scaleX(0); transform-origin: left;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════════════════ */
+    .sidebar {
+      position: fixed; left: 0; top: 0; width: 60px; height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 22px; z-index: 500;
+    }
+    .sidebar-brand {
+      writing-mode: vertical-lr; transform: rotate(180deg);
+      font-size: 10px; letter-spacing: .24em; text-transform: uppercase;
+      color: var(--muted); position: absolute; top: 38px; user-select: none;
+    }
+    .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--stone); border: none; cursor: none;
+      transition: background .4s, transform .4s; position: relative;
+    }
+    .dot.active { background: var(--accent); transform: scale(1.7); }
+    .dot::after {
+      content: attr(data-label);
+      position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+      font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--accent); white-space: nowrap; opacity: 0;
+      pointer-events: none; transition: opacity .3s;
+    }
+    .dot:hover::after { opacity: 1; }
+
+    /* ═══════════════════════════════════════════════════════════
+       MOBILE NAV
+    ═══════════════════════════════════════════════════════════ */
+    .mobile-nav {
+      display: none; position: fixed; top: 0; left: 0; right: 0; height: 50px;
+      background: rgba(8,8,7,.82); backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px); z-index: 500;
+      align-items: center; justify-content: space-between; padding: 0 24px;
+      border-bottom: 1px solid rgba(56,52,46,.4);
+    }
+    .mobile-nav-brand { font-family: var(--font-display); font-size: 15px; font-weight: 700; letter-spacing: .26em; text-indent:.26em; color: var(--cream); }
+    .mobile-chapter   { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+    .mobile-bar { display: none; }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION BASE + TYPE
+    ═══════════════════════════════════════════════════════════ */
+    .sec { position: relative; z-index: 1; padding: var(--pad-v) var(--pad-h); overflow: hidden; }
+    .inner { max-width: var(--max-w); margin: 0 auto; position: relative; z-index: 2; }
+
+    .d-xl { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; line-height: .9; letter-spacing: .01em; }
+    .d-l  { font-family: var(--font-display); font-size: var(--text-l);  font-weight: 600; line-height: 1.02; }
+    .d-m  { font-family: var(--font-display); font-size: var(--text-m);  font-weight: 600; line-height: 1.12; }
+    .stat { font-family: var(--font-display); font-size: clamp(64px,8vw,128px); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+    .lbl  { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; font-weight: 400; }
+    .body { font-size: 18px; line-height: 1.74; font-weight: 300; }
+
+    .c-cream{color:var(--cream)} .c-accent{color:var(--accent)} .c-accent-b{color:var(--accent-bright)}
+    .c-dark-a{color:var(--accent-dark)} .c-light{color:var(--light)} .c-silver{color:var(--silver)}
+    .c-muted{color:var(--muted)} .c-stone{color:var(--stone)}
+
+    .clip { overflow: hidden; }
+    .rule { width: 56px; height: 1px; background: var(--accent); transform-origin: left; }
+    .bg-gl { position: absolute; font-family: var(--font-display); font-weight: 700; pointer-events: none; user-select: none; z-index: 1; line-height: 1; }
+    .kicker { display:inline-flex; align-items:center; gap:14px; }
+    .kicker::before { content:''; width:32px; height:1px; background:var(--accent-dark); display:inline-block; }
+    .reveal-line { display: block; overflow: hidden; }
+    .reveal-line > * { display: block; will-change: transform; }
+
+    /* ═══════════════════════════════════════════════════════════
+       MARQUEE
+    ═══════════════════════════════════════════════════════════ */
+    .marquee {
+      position: relative; z-index: 2; overflow: hidden;
+      border-top: 1px solid var(--stone); border-bottom: 1px solid var(--stone);
+      padding: 26px 0; background: var(--off-black);
+      display: flex; white-space: nowrap;
+    }
+    .marquee-track { display: inline-flex; gap: 0; will-change: transform; }
+    .marquee span {
+      font-family: var(--font-display); font-style: italic;
+      font-size: clamp(28px,4vw,52px); font-weight: 500;
+      color: var(--stone); padding: 0 40px; display: inline-flex; align-items: center;
+    }
+    .marquee span::after { content: '·'; color: var(--accent-dark); margin-left: 80px; }
+    .marquee .hot { color: var(--accent); }
+
+    /* ═══════════════════════════════════════════════════════════
+       TILT CARDS
+    ═══════════════════════════════════════════════════════════ */
+    .tilt-card { position: relative; transform-style: preserve-3d; }
+    .card-shine { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(196,168,130,.16), transparent 70%); pointer-events: none; opacity: 0; z-index: 10; }
+
+    /* ═══════════════════════════════════════════════════════════
+       01 COVER
+    ═══════════════════════════════════════════════════════════ */
+    #cover { background: transparent; height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; }
+    .cover-bg-gl { font-size: 58vw; color: #100F0D; bottom: -.12em; right: -.06em; }
+    .cover-qr {
+      position: absolute; top: 38px; right: var(--pad-h); z-index: 5;
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 18px 14px 14px;
+      background: rgba(14, 13, 11, .52);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, .07);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+    }
+    .cover-qr-code {
+      width: 72px; height: 72px; flex-shrink: 0;
+      background: rgba(234, 227, 212, .06);
+      border: 1px solid rgba(196, 168, 130, .22);
+      display: grid; place-items: center; padding: 6px;
+    }
+    .cover-qr-code svg { width: 100%; height: 100%; display: block; }
+    .cover-qr-text { display: flex; flex-direction: column; gap: 4px; }
+    .cover-qr-label {
+      font-size: 9px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--accent); font-weight: 500;
+    }
+    .cover-qr-hint {
+      font-size: 11px; line-height: 1.45; color: var(--silver); max-width: 130px;
+    }
+    .hero-perspective { perspective: 1300px; perspective-origin: 50% 50%; margin: 38px 0; }
+    .cover-sub { max-width: 460px; }
+    .scroll-cue { position: absolute; bottom: 48px; left: var(--pad-h); display: flex; align-items: center; gap: 16px; z-index: 4; }
+    .scroll-cue-lbl { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+    .scroll-cue-bar { width: 40px; height: 1px; background: var(--stone); position: relative; overflow: hidden; }
+    .scroll-cue-bar::after { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:var(--accent); animation: scan 2.4s ease-in-out infinite; }
+    @keyframes scan { 0%{left:-100%} 60%{left:100%} 100%{left:100%} }
+
+    /* ═══════════════════════════════════════════════════════════
+       02 PROBLEM
+    ═══════════════════════════════════════════════════════════ */
+    #problem { background: var(--charcoal); min-height: 100vh; display: flex; align-items: center; }
+    .prob-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 84px; align-items: center; width: 100%; }
+    .prob-left { padding-right: 48px; border-right: 1px solid var(--stone); }
+    .prob-right { display: flex; flex-direction: column; gap: 44px; }
+    .quote-bl { border-left: 2px solid var(--accent); padding: 26px 30px; background: rgba(196,168,130,.04); }
+    .qt { font-family: var(--font-display); font-size: clamp(19px,2vw,26px); font-style: italic; line-height: 1.5; color: var(--accent); }
+    .qt-src { margin-top: 12px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .gap-bar { height: 6px; background: var(--dark); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+    .gap-bar > i { display:block; height:100%; background: linear-gradient(90deg,var(--accent-dark),var(--accent)); width:0; }
+
+    /* ═══════════════════════════════════════════════════════════
+       03 TENSION
+    ═══════════════════════════════════════════════════════════ */
+    #tension { background: var(--black); min-height: 100vh; display: flex; align-items: center; }
+
+    /* ═══════════════════════════════════════════════════════════
+       04 DAS GESICHT
+    ═══════════════════════════════════════════════════════════ */
+    #gesicht { background: var(--black); position: relative; }
+    .ges-sticky {
+      position: sticky; top: 0; height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      overflow: hidden; z-index: 1;
+    }
+    /* FIX: Intro weiter oben, damit das Gesicht atmet */
+    .ges-intro { position: absolute; top: 3vh; text-align: center; width: 100%; padding: 0 24px; z-index: 5; margin-bottom: 8px; }
+    .ges-intro .kicker { justify-content: center; margin-bottom: 12px; }
+    .ges-title {
+      font-family: var(--font-display); font-weight: 600;
+      font-size: clamp(24px, 3.5vw, 48px); line-height: 1.12; color: var(--cream);
+      max-width: 14ch; margin: 0 auto; letter-spacing: .01em;
+    }
+    .ges-title em { font-style: italic; color: var(--accent); }
+
+    .monolith {
+      position: relative; width: clamp(280px, 30vw, 440px); height: 62vh;
+      margin-top: 14vh; overflow: hidden;
+      box-shadow: 0 50px 120px rgba(0,0,0,.85);
+      clip-path: inset(0 0 100% 0);
+    }
+    .monolith::after { 
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+      background: var(--accent); z-index: 4;
+    }
+    .monolith img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center 18%;
+      filter: grayscale(.18) brightness(.86) contrast(1.04) sepia(.08);
+      transform: scale(1.12); will-change: transform;
+    }
+    .monolith-sheen {
+      position: absolute; inset: 0; z-index: 3; pointer-events: none;
+      background: linear-gradient(115deg, transparent 38%, rgba(216,188,149,.16) 50%, transparent 62%);
+      transform: translateX(-120%);
+    }
+    .monolith-grad { position: absolute; bottom: 0; left: 0; width: 100%; height: 46%; z-index: 2; background: linear-gradient(to top, rgba(8,8,7,.96) 0%, transparent 100%); }
+    .monolith-name {
+      position: absolute; bottom: 26px; width: 100%; text-align: center; z-index: 4;
+      font-family: var(--font-display); font-style: italic; font-size: 23px; color: var(--cream);
+    }
+    .monolith-name span {
+      display: block; font-family: var(--font-body); font-style: normal;
+      font-size: 9px; text-transform: uppercase; letter-spacing: .28em; text-indent: .28em;
+      color: var(--accent); margin-top: 10px; font-weight: 400;
+    }
+
+    .ges-chapters { position: relative; z-index: 10; max-width: var(--max-w); margin: 0 auto; padding: 0 var(--pad-h); }
+    .ges-spacer-top { height: 34vh; }
+    .ges-spacer-bot { height: 40vh; }
+    .ges-step { min-height: 78vh; display: flex; align-items: center; width: 100%; }
+    .ges-step.left  { justify-content: flex-start; }
+    .ges-step.right { justify-content: flex-end; }
+    .ges-box {
+      width: 100%; max-width: 480px; padding: 50px;
+      background: rgba(14,13,11,.62);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,.05); border-top: 2px solid var(--accent);
+      box-shadow: 0 40px 90px rgba(0,0,0,.6);
+      opacity: 0; will-change: transform, opacity;
+    }
+    .ges-box .chapter-tag { display: block; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin-bottom: 22px; }
+    .ges-box h3 { font-family: var(--font-display); font-size: clamp(26px,3vw,34px); font-weight: 600; line-height: 1.14; color: var(--cream); margin-bottom: 24px; }
+    .ges-box p { font-size: 15px; line-height: 1.78; color: var(--silver); }
+    .ges-list { list-style: none; }
+    .ges-list li { position: relative; padding-left: 22px; font-size: 14px; line-height: 1.7; color: var(--silver); margin-bottom: 18px; }
+    .ges-list li:last-child { margin-bottom: 0; }
+    .ges-list li::before { content: ''; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .ges-list strong { color: var(--cream); font-weight: 500; }
+    .vision-cta {
+      display: inline-flex; align-items: center; gap: 12px; margin-top: 36px;
+      font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .18em;
+      color: var(--cream); text-decoration: none; padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,.2); transition: color .3s, border-color .3s;
+      cursor: none;
+    }
+    .vision-cta .arrow { color: var(--accent); transition: transform .3s var(--ease-out); }
+    .vision-cta:hover { color: var(--accent); border-bottom-color: var(--accent); }
+    .vision-cta:hover .arrow { transform: translateX(6px); }
+
+    /* ═══════════════════════════════════════════════════════════
+       FARBWELT & PSYCHOLOGIE
+    ═══════════════════════════════════════════════════════════ */
+    #farben { background: var(--off-black); }
+    .farben-head { max-width: 620px; margin-bottom: 72px; }
+    .swatch-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
+    .swatch { position: relative; background: var(--charcoal); overflow: hidden; }
+    .swatch-chip { height: 220px; width: 100%; position: relative; }
+    .swatch-chip::after { content: attr(data-hex); position: absolute; bottom: 14px; left: 16px; font-size: 10px; letter-spacing: .12em; color: rgba(255,255,255,.5); font-variant-numeric: tabular-nums; }
+    .swatch-body { padding: 28px 24px 34px; }
+    .swatch-name { font-family: var(--font-display); font-size: 22px; color: var(--cream); margin-bottom: 6px; }
+    .swatch-role { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    .swatch-psy { font-size: 13px; line-height: 1.6; color: var(--silver); }
+    .farben-note { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+    .farben-note h4 { font-family: var(--font-display); font-size: clamp(22px,2.4vw,30px); color: var(--cream); margin-bottom: 18px; font-weight: 600; }
+    .farben-note p { font-size: 15px; line-height: 1.74; color: var(--silver); }
+    .farben-note em { color: var(--accent); font-style: italic; }
+
+    /* ═══════════════════════════════════════════════════════════
+       05 MARKT & PRODUKTE
+    ═══════════════════════════════════════════════════════════ */
+    #markt { background: var(--charcoal); }
+    .stat-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; margin-bottom: 84px; }
+    .stat-card { background: var(--dark); padding: 54px 40px 46px; position: relative; overflow: hidden; }
+    .stat-card::after { content:''; position:absolute; bottom:0; left:0; width:100%; height:2px; background:linear-gradient(90deg,var(--accent),transparent); transform:scaleX(0); transform-origin:left; transition:transform .7s var(--ease-out); }
+    .stat-card:hover::after { transform: scaleX(1); }
+    .sc-sub { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .sc-lbl { margin-top: 22px; font-size: 13px; line-height: 1.55; color: var(--silver); }
+    .pdiv { display: flex; align-items: center; gap: 24px; margin-bottom: 44px; }
+    .pdiv-line { flex: 1; height: 1px; background: var(--stone); }
+    
+    .pcards { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 2px;}
+    
+    /* Configurator Full Width Card */
+    .config-card { background: var(--off-black); padding: 50px 42px; border-top: 2px solid var(--accent); grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;}
+    .pcard { background: var(--off-black); border-top: 2px solid var(--stone); transition: border-color .4s; padding: 0; overflow: hidden; }
+    .pcard:hover { border-top-color: var(--accent); }
+    .pcard-img { width: 100%; aspect-ratio: 16/9; overflow: hidden; }
+    .pcard-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.8) saturate(.85); transition: transform 1.2s var(--ease-out), filter .6s ease; }
+    .pcard:hover .pcard-img img { transform: scale(1.06); filter: brightness(.9) saturate(1); }
+    .pcard-body { padding: 38px 42px 46px; }
+    .ptag { display: inline-block; border: 1px solid var(--accent); color: var(--accent); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; padding: 5px 12px; margin-bottom: 16px; }
+    .pname { color: var(--cream); margin-bottom: 26px; }
+    .pspecs { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 36px; }
+    .pspecs li { font-size: 15px; color: var(--silver); padding-left: 20px; position: relative; }
+    .pspecs li::before { content: '—'; position: absolute; left: 0; color: var(--accent-dark); }
+    .pprice { font-family: var(--font-display); font-size: clamp(32px,4vw,48px); font-weight: 600; color: var(--cream); }
+    .pprice sup { font-size: .42em; vertical-align: super; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; font-family: var(--font-body); font-weight: 300; }
+    
+    .market-images { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 72px; }
+    .market-img-wrap { overflow: hidden; aspect-ratio: 16/10; }
+    .market-img-wrap img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.85) saturate(.9); transition: transform .9s var(--ease-out), filter .5s ease; }
+    .market-img-wrap:hover img { transform: scale(1.04); filter: brightness(.95) saturate(1); }
+
+    /* ═══════════════════════════════════════════════════════════
+       06 BRAND BREAK
+    ═══════════════════════════════════════════════════════════ */
+    #brand-break { background: var(--off-black); height: 100vh; display: flex; align-items: flex-end; padding-bottom: calc(var(--pad-v) * .8); }
+    .bb-num { font-family: var(--font-display); font-size: clamp(120px,20vw,260px); font-weight: 700; color: var(--stone); line-height: 1; margin-bottom: -.08em; display: block; }
+
+    /* ═══════════════════════════════════════════════════════════
+       07 ZIELGRUPPE + CLEMENS
+    ═══════════════════════════════════════════════════════════ */
+    #zielgruppe { background: var(--black); }
+    .zg-intro { font-family: var(--font-display); font-size: clamp(36px,5vw,72px); font-style: italic; color: var(--cream); margin-bottom: 8px; line-height: 1.12; }
+    .target-images { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; height: 480px; margin-bottom: 72px; }
+    .target-img { overflow: hidden; position: relative; }
+    .target-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.75) saturate(.8); transition: transform 1.1s var(--ease-out), filter .6s ease; }
+    .target-img:hover img { filter: brightness(.85) saturate(.95); transform: scale(1.03); }
+    .img-caption { position: absolute; bottom: 22px; left: 26px; font-family: var(--font-display); font-size: 20px; color: var(--cream); font-style: italic; z-index: 2; text-shadow: 0 2px 14px rgba(0,0,0,.7); }
+    .zg-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 100px; }
+    .zg-card { background: var(--charcoal); padding: 46px 42px; }
+    .zg-row { display: grid; grid-template-columns: 110px 1fr; gap: 16px; padding: 17px 0; border-bottom: 1px solid var(--dark); }
+    .zg-row:last-child { border-bottom: none; }
+    .zg-key { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+    .zg-val { font-size: 15px; color: var(--light); line-height: 1.5; }
+    .clem-bg-gl { font-size: 50vw; color: #131210; bottom: -.15em; right: -.08em; }
+    .clem-rows { display: flex; flex-direction: column; max-width: 880px; position: relative; z-index: 2; }
+    .clem-row { display: grid; grid-template-columns: 240px 1fr; gap: 48px; padding: 42px 0; border-bottom: 1px solid var(--stone); align-items: start; }
+    .clem-row:first-child { border-top: 1px solid var(--stone); }
+    .clem-txt { font-size: 16px; color: var(--silver); line-height: 1.74; }
+    .clem-txt strong { color: var(--cream); font-weight: 400; }
+
+    /* ═══════════════════════════════════════════════════════════
+       08 KONKURRENZ — HORIZONTAL
+    ═══════════════════════════════════════════════════════════ */
+    #konkurrenz-outer { background: var(--charcoal); overflow: hidden; }
+    #konkurrenz-pin { height: 100vh; display: flex; flex-direction: column; padding: var(--pad-v) var(--pad-h) 0; box-sizing: border-box; overflow: hidden; }
+    .konk-hdr { flex-shrink: 0; margin-bottom: 48px; }
+    #konkurrenz-track { display: flex; gap: 24px; will-change: transform; flex: 1; align-items: stretch; padding-bottom: 60px; }
+    .comp-card { width: min(820px, 76vw); flex-shrink: 0; background: var(--off-black); padding: 50px 46px; border-top: 2px solid var(--stone); position: relative; transition: border-color .5s, background .5s; }
+    .comp-card.k-loom-card { background: var(--dark); }
+    .comp-card.illuminated { border-top-color: var(--accent); background: rgba(196,168,130,.07); }
+    .k-tag { display: inline-block; margin-top: 28px; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 5px 12px; }
+    .kc-name { margin-bottom: 6px; }
+    .kc-eg { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .kc-body { font-size: 15px; color: var(--silver); line-height: 1.7; }
+    .k-loom-card .kc-body { color: var(--light); }
+    .konk-hint { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+    .konk-hint i { width: 28px; height: 1px; background: var(--accent-dark); display: inline-block; }
+
+    /* ═══════════════════════════════════════════════════════════
+       09 HALO
+    ═══════════════════════════════════════════════════════════ */
+    #halo { background: var(--black); }
+    .halo-visual { margin-bottom: 72px; }
+    .halo-image { width: 100%; max-width: 700px; aspect-ratio: 16/10; object-fit: cover; filter: brightness(.7) saturate(.8); clip-path: inset(0 100% 0 0); }
+    .halo-lead { max-width: 660px; margin-bottom: 76px; }
+    .halo-lead em { font-family: var(--font-display); font-style: italic; font-size: 1.1em; color: var(--accent); }
+    .halo-steps { display: flex; flex-direction: column; }
+    .hstep { display: grid; grid-template-columns: 80px 1fr; gap: 40px; padding: 46px 0; border-bottom: 1px solid var(--stone); align-items: start; }
+    .hstep:first-child { border-top: 1px solid var(--stone); }
+    .hstep-num { font-family: var(--font-display); font-size: clamp(48px,6vw,72px); font-weight: 700; color: var(--stone); line-height: 1; transition: color .5s; }
+    .hstep:hover .hstep-num { color: var(--accent-dark); }
+    .hstep-body { font-size: 16px; color: var(--silver); line-height: 1.74; max-width: 620px; }
+    .hstep-body strong { color: var(--light); font-weight: 400; }
+
+    /* ═══════════════════════════════════════════════════════════
+       10 PREIS (PINNED)
+    ═══════════════════════════════════════════════════════════ */
+    #preis { background: var(--black); min-height: 100vh; display: flex; align-items: center; overflow: hidden; }
+    .preis-bg-num { font-family: var(--font-display); font-weight: 700; font-size: clamp(180px,28vw,380px); color: #0D0C0B; position: absolute; bottom: -.1em; left: -.02em; line-height: 1; pointer-events: none; user-select: none; z-index: 1; }
+    .preis-death { font-family: var(--font-display); font-size: clamp(20px,2.2vw,28px); font-style: italic; color: var(--light); margin: 54px 0; padding-left: 28px; border-left: 1px solid var(--stone); max-width: 620px; }
+    .preis-pts { display: flex; flex-direction: column; gap: 22px; max-width: 700px; }
+    .ppt { display: grid; grid-template-columns: 36px 1fr; gap: 20px; align-items: start; }
+    .ppt-num { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--accent-dark); padding-top: 2px; }
+    .ppt-txt { font-size: 16px; color: var(--silver); line-height: 1.66; }
+    .ppt-txt strong { color: var(--light); font-weight: 400; }
+
+    /* ═══════════════════════════════════════════════════════════
+       11 JOURNEY
+    ═══════════════════════════════════════════════════════════ */
+    #journey { background: var(--charcoal); }
+    .funnel { display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; }
+    .fstep { background: var(--dark); padding: 42px 28px; transform-origin: bottom; position: relative; }
+    .fstep::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--accent),transparent); opacity:0; transition:opacity .4s; }
+    .fstep:hover::before { opacity: 1; }
+    .fstep-tag { color: var(--muted); margin-bottom: 14px; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+    .fstep-title { font-family: var(--font-display); font-size: clamp(22px,2.5vw,32px); font-weight: 600; color: var(--cream); margin-bottom: 18px; }
+    .fstep-body { font-size: 14px; color: var(--silver); line-height: 1.66; }
+
+    /* ═══════════════════════════════════════════════════════════
+       12 CONTENT
+    ═══════════════════════════════════════════════════════════ */
+    #content-strat { background: var(--off-black); }
+    .cgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+    .ccard { background: var(--dark); padding: 50px 42px; }
+    .ci { padding: 19px 0; border-bottom: 1px solid var(--stone); }
+    .ci:last-child { border-bottom: none; }
+    .ci-k { font-size: 15px; color: var(--light); margin-bottom: 5px; }
+    .ci-v { font-size: 14px; color: var(--silver); line-height: 1.55; }
+
+    /* ═══════════════════════════════════════════════════════════
+       13 MINDSET
+    ═══════════════════════════════════════════════════════════ */
+    #mindset { background: var(--off-black); min-height: 100vh; display: flex; align-items: center; }
+    .mindset-bg-gl { font-size: 60vw; color: #131210; top: -.18em; right: -.04em; }
+    .mq1 { font-style: italic; margin-bottom: 12px; }
+    .mq2 { font-style: italic; margin-bottom: 54px; }
+
+    /* ═══════════════════════════════════════════════════════════
+       14 CLOSING
+    ═══════════════════════════════════════════════════════════ */
+    #closing { background: var(--black); height: 100vh; display: flex; align-items: center; }
+    .closing-bg-gl { font-size: 62vw; color: #100F0D; bottom: -.1em; right: -.06em; }
+    .closing-credit { position: absolute; bottom: 44px; right: var(--pad-h); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); z-index: 2; }
+
+    /* ═══════════════════════════════════════════════════════════
+       IMAGES / BG PATTERN
+    ═══════════════════════════════════════════════════════════ */
+    img { display: block; max-width: 100%; }
+    .bg-image { position: absolute; inset: 0; background-size: cover; background-position: center; will-change: transform; }
+    .bg-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+
+    #cover .bg-image { background-image: url('./images/Hauptbanner-1920-1080.jpg'); background-position: center 40%; z-index: 1; }
+    #cover .bg-overlay { background: linear-gradient(to bottom, rgba(8,8,7,.5) 0%, rgba(8,8,7,.72) 60%, rgba(8,8,7,.97) 100%); }
+    #cover .cover-bg-gl { z-index: 3; }
+    #cover .inner { z-index: 4; position: relative; }
+
+    #tension .bg-image { background-image: url('./images/loom-interior-mediteran-ofen.png'); background-position: center 30%; filter: brightness(.24) saturate(.6); z-index: 1; }
+    #tension .inner { z-index: 2; position: relative; }
+
+    #preis .bg-image { background-image: url('./images/loom-interior-mediteran-nacht.png'); background-position: center; filter: brightness(.12) saturate(.4); z-index: 1; }
+
+    #closing .bg-image { background-image: url('./images/loom-interior-mediteran.png'); background-position: center; filter: brightness(.15) saturate(.5); transform: scale(1.08); z-index: 1; }
+    #closing .bg-gl, #closing .inner { z-index: 2; position: relative; }
+
+    /* ═══════════════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      :root { --pad-h: 48px; --pad-v: 104px; }
+      .prob-grid { grid-template-columns: 1fr; gap: 56px; }
+      .prob-left { padding-right: 0; border-right: none; border-bottom: 1px solid var(--stone); padding-bottom: 56px; }
+      .stat-cards { grid-template-columns: 1fr; }
+      .funnel { grid-template-columns: repeat(2,1fr); }
+      .market-images { grid-template-columns: 1fr; }
+      .target-images { grid-template-columns: 1fr; height: auto; }
+      .target-img { height: 320px; }
+      .config-card { grid-template-columns: 1fr; gap: 32px; }
+      #konkurrenz-pin { padding-bottom: 0; }
+    }
+    @media (max-width: 768px) {
+      :root { --pad-h: 24px; --pad-v: 84px; }
+      body { cursor: auto; }
+      .cursor-dot, .cursor-ring, .cursor-label { display: none; }
+      .cover-qr { display: none; }
+      .sidebar { display: none; }
+      .mobile-nav { display: flex; }
+      #cover { padding-top: 80px; }
+      .cover-bg-gl { font-size: 90vw; }
+      .zg-cards { grid-template-columns: 1fr; }
+      .pcards { grid-template-columns: 1fr; }
+      .cgrid { grid-template-columns: 1fr; }
+      .funnel { grid-template-columns: 1fr; }
+      .clem-row { grid-template-columns: 1fr; gap: 8px; }
+      .zg-row { grid-template-columns: 84px 1fr; }
+      .hstep { grid-template-columns: 52px 1fr; gap: 20px; }
+      .bb-num { font-size: clamp(80px,15vw,140px); }
+      #konkurrenz-pin { height: auto; overflow: visible; }
+      #konkurrenz-track { flex-direction: column; width: 100%; gap: 2px; }
+      .comp-card { width: 100%; }
+      .scroll-cue { left: var(--pad-h); }
+      .closing-credit { right: var(--pad-h); }
+      .target-img { height: 260px; }
+      .halo-image { max-width: 100%; }
+      .pcard-body { padding: 30px 26px 38px; }
+      .marquee span { font-size: 26px; padding: 0 26px; }
+      .loader-count { bottom: 28px; right: 28px; }
+      .ges-sticky { position: relative; height: auto; padding: 60px 0 20px; }
+      .ges-intro { position: relative; top: 0; margin-bottom: 44px; }
+      .monolith { width: 100%; max-width: 480px; height: 56vh; margin: 0 auto; clip-path: none; }
+      .monolith img { transform: none; }
+      .ges-chapters { padding: 0 var(--pad-h); }
+      .ges-spacer-top, .ges-spacer-bot { display: none; }
+      .ges-step { min-height: auto; margin-bottom: 28px; justify-content: center; }
+      .ges-box { opacity: 1; max-width: 100%; padding: 40px 28px; }
+      .swatch-grid { grid-template-columns: 1fr 1fr; }
+      .swatch-chip { height: 150px; }
+      .farben-note { grid-template-columns: 1fr; gap: 32px; }
+    }
+    @media (max-width: 480px) {
+      :root { --pad-h: 20px; --pad-v: 68px; }
+      .ppt { grid-template-columns: 28px 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .halo-image { clip-path: none !important; }
+      .scroll-cue-bar::after { animation: none; }
+      .marquee-track { transform: none !important; }
+      .ges-box { opacity: 1 !important; }
+      .monolith { clip-path: none !important; }
+      .monolith img { transform: none !important; }
+      .monolith-sheen { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loader">
+    <svg class="loader-weave" viewBox="0 0 340 56" preserveAspectRatio="none" aria-hidden="true">
+      <path id="weave-path" d="M0,28 Q21.25,4 42.5,28 T85,28 T127.5,28 T170,28 T212.5,28 T255,28 T297.5,28 T340,28" />
+      <path id="weave-path2" d="M0,28 Q21.25,52 42.5,28 T85,28 T127.5,28 T170,28 T212.5,28 T255,28 T297.5,28 T340,28" />
+    </svg>
+    <div class="loader-brand" id="loader-brand">LOOM</div>
+    <div class="loader-sub" id="loader-sub">Österreichische Schurwolle</div>
+    <div class="loader-count" id="loader-count">00</div>
+  </div>
+  <div class="loader-curtain" id="loader-curtain"></div>
+
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="cursor-dot" id="cdot"></div>
+  <div class="cursor-ring" id="cring"></div>
+  <div class="cursor-label" id="clabel">Ziehen</div>
+
+  <div class="thread" aria-hidden="true">
+    <div class="thread-fill" id="thread-fill"></div>
+  </div>
+
+  <nav class="sidebar" aria-label="Kapitel">
+    <span class="sidebar-brand">LOOM</span>
+    <button class="dot active" data-target="cover"        data-label="Intro"></button>
+    <button class="dot"        data-target="gesicht"      data-label="Persona"></button>
+    <button class="dot"        data-target="markt"        data-label="Produkte"></button>
+    <button class="dot"        data-target="brand-break" data-label="Strategie"></button>
+    <button class="dot"        data-target="mindset"      data-label="Finale"></button>
+  </nav>
+
+  <div class="mobile-nav">
+    <span class="mobile-nav-brand">LOOM</span>
+    <span class="mobile-chapter" id="mob-ch">Intro</span>
+  </div>
+  <div class="mobile-bar" id="mob-bar"></div>
+
+  <section id="cover" data-chapter="0">
+    <div class="bg-image" id="cover-bg" aria-hidden="true"></div>
+    <div class="bg-overlay" aria-hidden="true"></div>
+    <span class="bg-gl cover-bg-gl" aria-hidden="true">L</span>
+    <aside class="cover-qr" aria-label="Präsentation am Handy mitverfolgen">
+      <div class="cover-qr-code" aria-hidden="true">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <rect width="64" height="64" fill="#EAE3D4" opacity=".08"/>
+          <rect x="4" y="4" width="18" height="18" fill="none" stroke="#C4A882" stroke-width="2"/>
+          <rect x="8" y="8" width="10" height="10" fill="#C4A882"/>
+          <rect x="42" y="4" width="18" height="18" fill="none" stroke="#C4A882" stroke-width="2"/>
+          <rect x="46" y="8" width="10" height="10" fill="#C4A882"/>
+          <rect x="4" y="42" width="18" height="18" fill="none" stroke="#C4A882" stroke-width="2"/>
+          <rect x="8" y="46" width="10" height="10" fill="#C4A882"/>
+          <rect x="28" y="8" width="4" height="4" fill="#C4A882"/>
+          <rect x="36" y="8" width="4" height="4" fill="#C4A882"/>
+          <rect x="28" y="16" width="4" height="4" fill="#C4A882"/>
+          <rect x="32" y="24" width="4" height="4" fill="#C4A882"/>
+          <rect x="40" y="28" width="4" height="4" fill="#C4A882"/>
+          <rect x="48" y="32" width="4" height="4" fill="#C4A882"/>
+          <rect x="28" y="32" width="4" height="4" fill="#C4A882"/>
+          <rect x="36" y="40" width="4" height="4" fill="#C4A882"/>
+          <rect x="44" y="44" width="4" height="4" fill="#C4A882"/>
+          <rect x="52" y="48" width="4" height="4" fill="#C4A882"/>
+          <rect x="28" y="48" width="4" height="4" fill="#C4A882"/>
+          <rect x="36" y="52" width="4" height="4" fill="#C4A882"/>
+        </svg>
+      </div>
+      <div class="cover-qr-text">
+        <span class="cover-qr-label">Live mitlesen</span>
+        <span class="cover-qr-hint">QR scannen — Präsentation auf dem Handy</span>
+      </div>
+    </aside>
+    <div class="inner" style="width:100%;">
+      <p class="lbl c-accent kicker" id="cov-lbl">Brand Strategy &amp; E-Commerce Marketing</p>
+      <div class="hero-perspective">
+        <span class="reveal-line"><span class="d-xl c-cream" id="hl1">Wir wärmen</span></span>
+        <span class="reveal-line"><span class="d-xl c-accent" id="hl2">dein Zuhause.</span></span>
+      </div>
+      <p class="body c-silver cover-sub" id="cov-sub">100&thinsp;% österreichische Schurwolle.&ensp;Handgewebt.&ensp;Quiet&nbsp;Luxury.</p>
+    </div>
+    <div class="scroll-cue" aria-hidden="true">
+      <span class="scroll-cue-lbl">Scroll</span>
+      <div class="scroll-cue-bar"></div>
+    </div>
+  </section>
+
+  <section id="problem" class="sec" data-chapter="0">
+    <div class="inner">
+      <div class="prob-grid">
+        <div class="prob-left">
+          <p class="lbl c-accent" style="margin-bottom:26px;" data-scramble>Die Lücke.</p>
+          <div class="stat c-cream" style="margin-bottom:14px;"><span id="s10">0</span>%</div>
+          <p class="body c-silver" style="max-width:340px;">sagen, sie wollen bewusster wohnen. Gekauft wird trotzdem das Billigste.</p>
+          <div class="gap-bar"><i id="gapbar"></i></div>
+        </div>
+        <div class="prob-right">
+          <div>
+            <div class="rule" style="margin-bottom:34px;"></div>
+            <h2 class="d-m c-cream" style="margin-bottom:22px;">Das stille Problem.</h2>
+            <p class="body c-light" style="max-width:540px;">
+              Synthetische Heimtextilien landen nach wenigen Jahren auf der Deponie.
+              Billige Fasern aus Übersee, Massenware ohne Herkunft.
+              Die Zielgruppe spürt den Widerspruch — und kauft trotzdem dasselbe.
+              Nicht aus Überzeugung. Aus Mangel an einer Alternative, die schön <em>und</em> ehrlich ist.
+            </p>
+          </div>
+          <div class="quote-bl">
+            <p class="qt">„Zwischen Anspruch und Einkaufswagen klafft die größte Lücke im Premium-Interior."</p>
+            <p class="qt-src">Attitude-Behaviour-Gap · Quelle: NielsenIQ Sustainability Report 2024</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tension" class="sec" data-chapter="0">
+    <div class="bg-image" aria-hidden="true"></div>
+    <div class="inner">
+      <div style="margin-bottom:60px;">
+        <div class="clip"><span class="d-l c-cream tline">Keiner will verzichten.</span></div>
+        <div class="clip"><span class="d-l c-cream tline">Keiner will schuldig sein.</span></div>
+        <div class="clip"><span class="d-l c-cream tline">Keiner will einen</span></div>
+        <div class="clip"><span class="d-l c-cream tline">schlechteren Teppich.</span></div>
+      </div>
+      <p class="lbl c-accent kicker" id="tcta">LOOM löst das.</p>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="mq-track">
+      <span>Schurwolle</span><span class="hot">Handgewebt</span><span>Made in Austria</span><span>Quiet Luxury</span><span class="hot">Eco-Luxury</span>
+      <span>Schurwolle</span><span class="hot">Handgewebt</span><span>Made in Austria</span><span>Quiet Luxury</span><span class="hot">Eco-Luxury</span>
+    </div>
+  </div>
+
+  <section id="gesicht" data-chapter="1">
+    <div class="ges-sticky">
+      <div class="ges-intro">
+        <p class="lbl c-accent kicker">Das Manifest</p>
+        <h2 class="ges-title">Wahrer Luxus schreit nicht.<br>Er <em>dämpft</em> den Lärm der Welt.</h2>
+      </div>
+      <figure class="monolith" id="monolith">
+        <img src="https://cdn02.plentymarkets.com/shf6dsifatyv/frontend/Clemens-Walcher-10.png" alt="Clemens Walcher — Creative Director von LOOM" loading="lazy">
+        <div class="monolith-sheen" id="monolith-sheen"></div>
+        <div class="monolith-grad"></div>
+        <figcaption class="monolith-name">Clemens Walcher<span>Creative Director</span></figcaption>
+      </figure>
+    </div>
+
+    <div class="ges-chapters">
+      <div class="ges-spacer-top"></div>
+
+      <div class="ges-step left">
+        <div class="ges-box" data-ges>
+          <span class="chapter-tag">01 / Der Bruch</span>
+          <h3>Die Seele des Raumes.</h3>
+          <p>Moderne Architektur ist ein visuelles Meisterwerk — Stahl, Glas, Sichtbeton. Doch als ich vor Jahren in einer perfekten, leeren Villa stand, spürte ich nur Kälte. Jeder Schritt hallte hart zurück. Keine Akustik, keine Haptik, keine Seele. LOOM entstand aus dem Bedürfnis, der unterkühlten Moderne einen Gegenpol zu setzen: ein Fundament aus roher Natur, das uns erdet.</p>
+        </div>
+      </div>
+
+      <div class="ges-step right">
+        <div class="ges-box" data-ges>
+          <span class="chapter-tag">02 / Die Identität</span>
+          <h3>Für die, die mit den Händen sehen.</h3>
+          <p>Wir entwerfen nicht für den flüchtigen Konsum. LOOM ist für Menschen, die nicht erklären müssen, warum sie anders sind. Für Ästheten, die mit den Fingerspitzen über eine Oberfläche fahren, bevor sie entscheiden. Für jene, die in einer immer lauteren, digitaleren Welt nach etwas Echtem, Schwerem und Unverfälschtem suchen.</p>
+        </div>
+      </div>
+
+      <div class="ges-step left">
+        <div class="ges-box" data-ges>
+          <span class="chapter-tag">03 / Die Haltung</span>
+          <h3>Keine Kompromisse.</h3>
+          <ul class="ges-list">
+            <li><strong>Radikale Schwere:</strong> Keine flüchtigen Stoffe. Mit 4.500&nbsp;g pro m² weben wir Substanz, die den Raum physisch ankert.</li>
+            <li><strong>Akustische Architektur:</strong> Wir verkaufen keine Teppiche, sondern Frequenzen — die den Hall schlucken und Stille erschaffen.</li>
+            <li><strong>Alpiner Purismus:</strong> 100&nbsp;% naturbelassene Schurwolle mit echtem Lanolin. Keine globale Lieferkette, kein Plastik, keine Ausreden.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ges-step right">
+        <div class="ges-box" data-ges>
+          <span class="chapter-tag">04 / Das Erbe</span>
+          <h3>Die Rückkehr der Verlangsamung.</h3>
+          <p>Wir wollen Räume nicht nur einrichten — wir wollen sie heilen. Unsere Vision ist ein Vermächtnis des Handwerks, das schnelle Trends und Generationen überdauert. Ein LOOM-Produkt verlässt man nicht. Man vererbt es.</p>
+          <a href="https://shf6dsifatyv.c01-15.plentymarkets.com/de/stories/stille-als-statement/" class="vision-cta" target="_blank" rel="noopener">Betrete das Fundament <span class="arrow">→</span></a>
+        </div>
+      </div>
+
+      <div class="ges-spacer-bot"></div>
+    </div>
+  </section>
+
+  <section id="markt" class="sec" data-chapter="2">
+    <div class="inner">
+      <div style="margin-bottom:68px;">
+        <p class="lbl c-accent kicker" style="margin-bottom:18px;" data-scramble>Der Markt.</p>
+        <div class="rule" style="margin-bottom:30px;"></div>
+        <h2 class="d-m c-cream">Der Markt ist bereit.</h2>
+      </div>
+      <div class="stat-cards">
+        <div class="stat-card tilt-card">
+          <p class="sc-sub">Eco-Luxury Interior · Schätzwert 2024</p>
+          <span class="stat c-accent" id="sm1">€0</span>
+          <p class="sc-lbl">Marktvolumen nachhaltiger Premium-Wohntextilien — Quelle: Statista Industry Report 2024</p>
+        </div>
+        <div class="stat-card tilt-card">
+          <p class="sc-sub">Jährliches Wachstum (CAGR)</p>
+          <span class="stat c-cream" id="sm2">+0%</span>
+          <p class="sc-lbl">Dynamischer als der klassische Luxusmarkt — Quelle: Bain & Company Luxury Study</p>
+        </div>
+        <div class="stat-card tilt-card">
+          <p class="sc-sub">Premium-Segment DACH</p>
+          <span class="stat c-accent" id="sm3">€0</span>
+          <p class="sc-lbl">Zahlungsbereitschaft für handgefertigte Unikate im Premium-Interior</p>
+        </div>
+      </div>
+      
+      <div class="pdiv">
+        <p class="lbl c-accent">Was wir verkaufen.</p>
+        <div class="pdiv-line"></div>
+      </div>
+      <div class="pcards">
+        <div class="pcard tilt-card">
+          <div class="pcard-img"><img src="./images/Hauptbanner-medi-1920-1080.jpg" alt="LOOM Schafwollteppich mediterran" loading="lazy"></div>
+          <div class="pcard-body">
+            <div class="ptag">Hero Product</div>
+            <h3 class="d-m pname">Schafwoll&shy;teppich</h3>
+            <ul class="pspecs">
+              <li>Handgewebt in österreichischen Meisterbetrieben</li>
+              <li>100&nbsp;% österreichische Schurwolle</li>
+              <li>140×200 bis 200×300&nbsp;cm</li>
+              <li>Natürliche Farbgebung, ohne Chemie</li>
+            </ul>
+            <p class="pprice">Ab&nbsp;€590 <sup>inkl. Lieferung</sup></p>
+          </div>
+        </div>
+        <div class="pcard tilt-card">
+          <div class="pcard-img"><img src="./images/loom-interior-mediteran-ausgang.jpg" alt="LOOM Walkpatschen mediterran" loading="lazy"></div>
+          <div class="pcard-body">
+            <div class="ptag">Halo Carrier</div>
+            <h3 class="d-m pname">Walk&shy;patschen</h3>
+            <ul class="pspecs">
+              <li>Handgefertigt, 100&nbsp;% Schurwolle</li>
+              <li>Einstieg in die LOOM-Welt</li>
+              <li>Niedrige Hemmschwelle, hohe Bindung</li>
+              <li>Wiederkauf ≈ 1× pro Jahr</li>
+            </ul>
+            <p class="pprice">Ab&nbsp;€60 <sup>pro Paar</sup></p>
+          </div>
+        </div>
+        
+        <div class="config-card tilt-card">
+          <div>
+            <div class="ptag" style="border-color:var(--accent-dark); color:var(--accent-dark);">UX & Psychologie</div>
+            <h3 class="d-m c-cream pname">Der Sonderwunsch.</h3>
+            <p class="body c-silver" style="margin-bottom: 24px;">Luxus bedeutet kompromisslose Individualität. In unserem Shop konfigurieren Kunden ihre Wunschfarbe und das exakte Wunschmaß — und sehen sofort den kalkulierten Live-Preis.</p>
+            <ul class="pspecs">
+              <li><strong>Frictionless Luxury:</strong> Keine Wartezeit auf Angebote. Der Preis ist sofort transparent.</li>
+              <li><strong>Der IKEA-Effekt:</strong> Wer sein Produkt selbst konfiguriert, baut emotionalen Besitz auf. Der finale Preis rückt psychologisch in den Hintergrund, weil das Endresultat ein "Co-Creation"-Unikat ist.</li>
+            </ul>
+          </div>
+          <div class="pcard-img" style="border-radius: 4px; border: 1px solid var(--stone);">
+             <img src="./images/loom-interior-mediteran-essen.png" alt="LOOM Konfigurator Preview" loading="lazy">
+          </div>
+        </div>
+      </div>
+      
+      <div class="market-images">
+        <div class="market-img-wrap"><img src="./images/loom-interior-mediteran-essen.png" alt="LOOM Esszimmer mediterran" loading="lazy"></div>
+        <div class="market-img-wrap"><img src="./images/loom-interior-mediteran-Esszimmer.png" alt="LOOM Teppich Esszimmer" loading="lazy"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="brand-break" class="sec" data-chapter="3">
+    <div class="inner">
+      <span class="bb-num" id="bb-num">02</span>
+      <div style="margin-bottom:42px;">
+        <div class="clip"><h2 class="d-xl c-cream bbl">Brand Strategy</h2></div>
+        <div class="clip"><h2 class="d-xl c-cream bbl">&amp; E-Commerce</h2></div>
+        <div class="clip"><h2 class="d-xl c-cream bbl">Marketing</h2></div>
+      </div>
+      <p class="body c-muted" style="max-width:540px;" id="bb-sub">
+        Eine Masterclass in Markenaufbau, Konsumpsychologie und der Kunst,
+        Quiet Luxury digital zu skalieren — ohne je laut zu werden.
+      </p>
+    </div>
+  </section>
+
+  <section id="farben" class="sec" data-chapter="3">
+    <div class="inner">
+      <div class="farben-head">
+        <p class="lbl c-accent kicker" style="margin-bottom:18px;" data-scramble>Farbwelt.</p>
+        <h2 class="d-m c-cream" style="margin-bottom:22px;">Die Psychologie der Stille.</h2>
+        <p class="body c-silver">Quiet Luxury entsteht nicht durch Farbe — sondern durch ihre Abwesenheit. LOOM verzichtet bewusst auf jeden grellen Akzent. Was bleibt, ist eine Palette aus Dunkelheit, Wolle und Erde: das chromatische Echo des Materials selbst.</p>
+      </div>
+
+      <div class="swatch-grid">
+        <div class="swatch" data-swatch>
+          <div class="swatch-chip" style="background:#080807;" data-hex="#080807"></div>
+          <div class="swatch-body">
+            <p class="swatch-name">Tiefschwarz</p>
+            <p class="swatch-role">Basis</p>
+            <p class="swatch-psy">Galerie statt Schaufenster. Schwarz entzieht Reize und lässt das Produkt allein sprechen — Luxus durch Reduktion.</p>
+          </div>
+        </div>
+        <div class="swatch" data-swatch>
+          <div class="swatch-chip" style="background:#161513;" data-hex="#161513"></div>
+          <div class="swatch-body">
+            <p class="swatch-name">Anthrazit</p>
+            <p class="swatch-role">Struktur</p>
+            <p class="swatch-psy">Ein warmes, leicht bräunliches Schwarz. Es gibt Tiefe und Schichtung, ohne je kalt oder technisch zu wirken.</p>
+          </div>
+        </div>
+        <div class="swatch" data-swatch>
+          <div class="swatch-chip" style="background:#C4A882;" data-hex="#C4A882"></div>
+          <div class="swatch-body">
+            <p class="swatch-name">Wollgold</p>
+            <p class="swatch-role">Signatur</p>
+            <p class="swatch-psy">Der einzige Akzent. Die Farbe von Lanolin, Schurwolle und Abendlicht — Wärme, Haptik und Handwerk in einem Ton.</p>
+          </div>
+        </div>
+        <div class="swatch" data-swatch>
+          <div class="swatch-chip" style="background:#EAE3D4;" data-hex="#EAE3D4"></div>
+          <div class="swatch-body">
+            <p class="swatch-name">Naturweiß</p>
+            <p class="swatch-role">Licht</p>
+            <p class="swatch-psy">Ungefärbte Wolle, rohes Papier. Steht für Ehrlichkeit und Unverfälschtheit — das Gegenteil von synthetischem Bleichweiß.</p>
+          </div>
+        </div>
+        <div class="swatch" data-swatch>
+          <div class="swatch-chip" style="background:#8C7355;" data-hex="#8C7355"></div>
+          <div class="swatch-body">
+            <p class="swatch-name">Erdbraun</p>
+            <p class="swatch-role">Wurzel</p>
+            <p class="swatch-psy">Der gedämpfte Bruder des Akzents. Erdung, Beständigkeit, Herkunft — die Farbe des Bodens, auf dem alles steht.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="farben-note">
+        <div>
+          <h4>Warum eine streng limitierte Palette?</h4>
+          <p>Jede zusätzliche Farbe ist eine Behauptung. Marken, die viel sagen wollen, schreien in Bunt. LOOM sagt eine Sache — <em>echte Substanz</em> — und sagt sie in genau sechs harmonierenden Tönen. Diese Disziplin signalisiert der Zielgruppe Sicherheit: Wer so wenig braucht, hat nichts zu verstecken.</p>
+        </div>
+        <div>
+          <h4>Der Kontrast-Effekt</h4>
+          <p>Auf nahezu schwarzem Grund wirkt das Wollgold nicht laut, sondern <em>kostbar</em> — wie ein Lichtschein in einem dunklen Raum. Dieselbe Farbe auf Weiß wäre beliebig. Der dunkle Kontext macht den Akzent erst wertvoll. Genau das ist die Mechanik von Quiet Luxury, übersetzt in Pixel.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="zielgruppe" class="sec" data-chapter="3">
+    <div class="inner">
+      <p class="lbl c-accent kicker" style="margin-bottom:22px;" data-scramble>Zielgruppe.</p>
+      <p class="zg-intro" id="zg-q">«The Conscious Aesthete»</p>
+      <p class="body c-muted" style="max-width:500px;margin-bottom:56px;">Diese Zielgruppe kauft keine Produkte — sie kauft Bedeutung.</p>
+
+      <div class="target-images">
+        <div class="target-img"><img src="./images/loom-interior-mediteran-zimmer.png" alt="LOOM Schlafzimmer mediterran" loading="lazy"><p class="img-caption">Der Conscious Aesthete</p></div>
+        <div class="target-img"><img src="./images/loom-interior-mediteran-zimmer-2.png" alt="LOOM Schlafzimmer mediterran 2" loading="lazy"></div>
+      </div>
+
+      <div class="zg-cards">
+        <div class="zg-card tilt-card">
+          <p class="lbl c-accent" style="margin-bottom:30px;">Demografie</p>
+          <div class="zg-row"><span class="zg-key">Alter</span><span class="zg-val">35 – 65 Jahre</span></div>
+          <div class="zg-row"><span class="zg-key">Einkommen</span><span class="zg-val">Hoch, häufig Immobilienbesitz</span></div>
+          <div class="zg-row"><span class="zg-key">Berufe</span><span class="zg-val">Architekt:innen, Ärzt:innen, Agenturinhaber</span></div>
+          <div class="zg-row"><span class="zg-key">Geografie</span><span class="zg-val">Wien, München, Zürich, Hamburg</span></div>
+        </div>
+        <div class="zg-card tilt-card">
+          <p class="lbl c-accent" style="margin-bottom:30px;">Psychografie</p>
+          <div class="zg-row"><span class="zg-key">Haltung</span><span class="zg-val">Quiet Luxury — Status durch Kuratierung</span></div>
+          <div class="zg-row"><span class="zg-key">Konsum</span><span class="zg-val">Kauft weniger, kauft besser</span></div>
+          <div class="zg-row"><span class="zg-key">Medien</span><span class="zg-val">Monocle, Architectural Digest</span></div>
+          <div class="zg-row"><span class="zg-key">Aversion</span><span class="zg-val">Verabscheut Fast-Furniture &amp; Greenwashing</span></div>
+        </div>
+      </div>
+
+      <div style="position:relative;overflow:hidden;">
+        <span class="bg-gl clem-bg-gl" aria-hidden="true">CW</span>
+        <p class="lbl c-accent kicker" style="margin-bottom:18px;position:relative;z-index:2;" data-scramble>Die Mechanik.</p>
+        <h2 class="d-m c-cream" style="margin-bottom:8px;letter-spacing:.04em;position:relative;z-index:2;">Warum Clemens funktioniert.</h2>
+        <p class="body c-silver" style="font-style:italic;margin-bottom:58px;position:relative;z-index:2;">Das Gesicht haben Sie gesehen — hier ist das Kalkül dahinter.</p>
+        <div class="clem-rows">
+          <div class="clem-row">
+            <p class="lbl c-accent" style="padding-top:4px;">Warum eine Persona?</p>
+            <p class="clem-txt">Menschen kaufen von Menschen. <strong>Vertrauen entsteht durch Gesichter, nicht durch Logos.</strong> Clemens verkörpert den Maker — österreichischer Handwerker mit Weltniveau-Anspruch.</p>
+          </div>
+          <div class="clem-row">
+            <p class="lbl c-accent" style="padding-top:4px;">Der Archetyp</p>
+            <p class="clem-txt"><strong>Der Schöpfer:</strong> Erschafft Bedeutung aus Rohmaterial. Kein Performance-Unternehmer — ein Handwerker, der über sein Metier spricht wie ein Architekt über Materialien.</p>
+          </div>
+          <div class="clem-row">
+            <p class="lbl c-accent" style="padding-top:4px;">Psycholog. Effekt</p>
+            <p class="clem-txt">Die Zielgruppe kauft keinen Teppich. Sie kauft <strong>Clemens' Überzeugung.</strong> Das ist der emotionale Preis, den kein Fast-Furniture-Anbieter zahlen kann.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="konkurrenz-outer" data-chapter="3">
+    <div id="konkurrenz-pin">
+      <div class="konk-hdr">
+        <p class="lbl c-accent kicker" style="margin-bottom:18px;" data-scramble>Positionierung.</p>
+        <h2 class="d-m c-cream" style="margin-bottom:14px;">Konkurrenz &amp; Blue Ocean.</h2>
+        <p class="konk-hint"><i></i> Horizontal scrollen</p>
+      </div>
+      <div id="konkurrenz-track">
+        <div class="comp-card tilt-card">
+          <p class="lbl c-muted">Segment 01</p>
+          <h3 class="d-m c-cream kc-name" style="font-size:clamp(24px,3vw,38px);">Der Öko-Traditionalist</h3>
+          <p class="kc-eg">z.&thinsp;B. Grüne Erde, Lebensart</p>
+          <p class="kc-body">Starkes Nachhaltigkeits-Narrativ, schwache Ästhetik. Spricht die Öko-Boomer an, nicht den Conscious Aesthete. Keine Begehrlichkeit, kein Luxus-Signal.</p>
+        </div>
+        <div class="comp-card tilt-card">
+          <p class="lbl c-muted">Segment 02</p>
+          <h3 class="d-m c-cream kc-name" style="font-size:clamp(24px,3vw,38px);">Der Fast-Premium-Markt</h3>
+          <p class="kc-eg">z.&thinsp;B. Westwing, Connox</p>
+          <p class="kc-body">Starke Ästhetik, null Substanz. Billig produziert, teuer verpackt. Greenwashing als Standard. Trendgetrieben — keine Identität, keine Herkunft, kein Versprechen.</p>
+        </div>
+        <div class="comp-card tilt-card k-loom-card" id="loom-karte">
+          <p class="lbl c-accent">LOOM</p>
+          <h3 class="d-m c-cream kc-name" style="font-size:clamp(24px,3vw,38px);">Eco-Luxury</h3>
+          <p class="kc-eg" style="color:var(--accent-dark);">Unser Blue Ocean</p>
+          <p class="kc-body">Starke Ästhetik <em>und</em> echte Substanz. Architektonischer Minimalismus trifft österreichisches Handwerk. Das Segment existiert — niemand besetzt es. Noch nicht.</p>
+          <span class="k-tag">Blue Ocean ★</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="halo" class="sec" data-chapter="3">
+    <div class="inner">
+      <p class="lbl c-accent kicker" style="margin-bottom:18px;" data-scramble>Marketing-Strategie.</p>
+      <h2 class="d-m c-cream" style="margin-bottom:22px;">Der «Halo-Effekt».</h2>
+      <div class="halo-visual">
+        <img src="./images/loom-warmes-zimmer-banner.png" alt="LOOM warmes Zimmer Abendlicht" loading="lazy" class="halo-image">
+      </div>
+      <p class="body c-silver halo-lead">
+        Wie verkauft man Walkpatschen für €60 an eine anspruchsvolle Zielgruppe?
+        <em>Man beginnt mit dem, was man sich leisten kann — und endet mit dem, was man begehrt.</em>
+      </p>
+      <div class="halo-steps">
+        <div class="hstep"><span class="hstep-num">01</span><div><p class="lbl c-accent" style="margin-bottom:14px;">Das Hero-Product</p><p class="hstep-body">Der Teppich ist das Halo-Objekt. Er erzeugt Begehren, definiert die Marke, setzt den Qualitätsstandard. <strong>Er muss nicht von jedem gekauft, aber von jedem begehrt werden.</strong></p></div></div>
+        <div class="hstep"><span class="hstep-num">02</span><div><p class="lbl c-accent" style="margin-bottom:14px;">Die Strahlkraft</p><p class="hstep-body">Die Walkpatschen für €60 sind die Einführung in die LOOM-Welt. <strong>Erstberührung, Vertrauen, Haptik-Erlebnis</strong> — in einem Paket, bei 20× niedrigerem Einsatz.</p></div></div>
+        <div class="hstep"><span class="hstep-num">03</span><div><p class="lbl c-accent" style="margin-bottom:14px;">Die Monetarisierung</p><p class="hstep-body">Patschen → E-Mail-Liste → Teppich. Der Funnel ist simpel, die Marge auf dem Teppich ist stark. <strong>Customer Lifetime Value</strong> entsteht durch Vertrauen, nicht durch Rabatte.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="preis" class="sec" data-chapter="3">
+    <div class="bg-image" aria-hidden="true"></div>
+    <span class="preis-bg-num" id="preis-bg" aria-hidden="true" style="z-index:2;">0%</span>
+    <div class="inner" style="position:relative;z-index:2;">
+      <div class="clip"><h2 class="d-xl c-cream pl">0% Rabatt.</h2></div>
+      <div class="clip"><h2 class="d-xl c-accent pl">Niemals.</h2></div>
+      <p class="preis-death" id="pd">„Der Tod des Luxus ist der Sale."</p>
+      <div class="preis-pts" id="pp">
+        <div class="ppt"><span class="ppt-num">I</span><p class="ppt-txt"><strong>Preissenkung ist Vertrauensbruch.</strong> Wer heute 20&nbsp;% Rabatt bekommt, zahlt morgen keinen Vollpreis mehr.</p></div>
+        <div class="ppt"><span class="ppt-num">II</span><p class="ppt-txt"><strong>Der Preis ist die Botschaft.</strong> €590 für einen Teppich sagt: Ich bin kein Fast-Furniture.</p></div>
+        <div class="ppt"><span class="ppt-num">III</span><p class="ppt-txt"><strong>Statt Sale:</strong> limitierte Editionen, Wartelisten, handgeschriebene Notizen im Paket.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="journey" class="sec" data-chapter="3">
+    <div class="inner">
+      <p class="lbl c-accent kicker" style="margin-bottom:18px;" data-scramble>Customer Journey.</p>
+      <div class="rule" style="margin-bottom:34px;"></div>
+      <h2 class="d-m c-cream" style="margin-bottom:76px;">Der Funnel.</h2>
+      <div class="funnel" id="funnel">
+        <div class="fstep tilt-card"><p class="fstep-tag">Top of Funnel</p><p class="fstep-title">Der Hook</p><p class="fstep-body">Instagram-Reel: Atmosphärisches Voiceover → Natur → Wolle → Handwerk → Produkt. Watch-Time 45&nbsp;s+ triggert den Algorithmus.</p></div>
+        <div class="fstep tilt-card"><p class="fstep-tag">Mid Funnel</p><p class="fstep-title">Das Manifest</p><p class="fstep-body">Website-Besuch, Story-Highlights, Clemens erklärt den Prozess. Vertrauen durch Transparenz. Erstkauf: Patschen für €60.</p></div>
+        <div class="fstep tilt-card"><p class="fstep-tag">Low Funnel</p><p class="fstep-title">Die Haptik</p><p class="fstep-body">Post-Purchase-Mail: Herkunft der Wolle, der Webstuhl, die Hände dahinter. Der Kunde wird zum Kenner.</p></div>
+        <div class="fstep tilt-card"><p class="fstep-tag">Bottom Funnel</p><p class="fstep-title">Das Erbe</p><p class="fstep-body">Teppich-Kauf nach 3–6 Monaten. Empfehlung im Freundeskreis. Customer Lifetime Value: über Generationen.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="content-strat" class="sec" data-chapter="3">
+    <div class="inner">
+      <p class="lbl c-accent kicker" style="margin-bottom:18px;" data-scramble>Content-Strategie.</p>
+      <h2 class="d-m c-cream" style="margin-bottom:68px;">Instagram & Pinterest.</h2>
+      <div class="cgrid">
+        <div class="ccard tilt-card">
+          <p class="lbl c-accent" style="margin-bottom:38px;">Instagram: Die Emotion.</p>
+          <div class="ci"><p class="ci-k">Reels: Natur → Material → Produkt</p><p class="ci-v">Der Weg der Wolle — von der Schur bis zum Teppich. Kein Schnitt-Stakkato, kein Hype.</p></div>
+          <div class="ci"><p class="ci-k">Kein Trending-Audio</p><p class="ci-v">Ambient-Ton: Webstuhl, Wolle, Stille. LOOM klingt wie LOOM.</p></div>
+          <div class="ci"><p class="ci-k">Clemens erklärt</p><p class="ci-v">Warum dieser Rohstoff, diese Entscheidung, dieser Preis.</p></div>
+        </div>
+        <div class="ccard tilt-card">
+          <p class="lbl c-accent" style="margin-bottom:38px;">Pinterest: Die Conversion.</p>
+          <div class="ci"><p class="ci-k">Visual Search Ecosystem</p><p class="ci-v">Nutzer auf Pinterest planen ihre Zukunft (Villen, Einrichtung). Kaufbereitschaft ist extrem hoch.</p></div>
+          <div class="ci"><p class="ci-k">Long-term SEO</p><p class="ci-v">Ein Pinterest-Pin generiert Monate später noch Traffic, ein Insta-Reel stirbt nach 48 Stunden.</p></div>
+          <div class="ci"><p class="ci-k">Aesthetic Moodboards</p><p class="ci-v">Bilder von LOOM-Produkten integriert in mediterrane und alpine Architektur.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="mindset" class="sec" data-chapter="4">
+    <span class="bg-gl mindset-bg-gl" aria-hidden="true">«</span>
+    <div class="inner" style="position:relative;z-index:2;">
+      <div class="clip"><p class="d-m c-cream mq1" id="mq1">„Wahrer E-Commerce-Erfolg entsteht nicht durch lautes Verkaufen —<br>sondern durch das tiefe Verständnis<br>für die Werte der Zielgruppe."</p></div>
+      <div class="clip" style="margin-top:14px;"><p class="d-m c-accent mq2" id="mq2">„Man muss das Produkt nicht nur handwerklich begreifen,<br>sondern vor allem die psychologische Lücke,<br>die es im Leben des Kunden füllt."</p></div>
+      <p class="lbl c-muted" id="mqs" style="margin-top:54px;">— Das Mindset hinter Advolution Pro</p>
+    </div>
+  </section>
+
+  <section id="closing" data-chapter="4">
+    <div class="bg-image" id="closing-bg" aria-hidden="true"></div>
+    <span class="bg-gl closing-bg-gl" aria-hidden="true">L</span>
+    <div class="inner" style="position:relative;z-index:2;width:100%;padding:var(--pad-h);">
+      <div class="clip"><h2 class="d-xl c-cream" id="clt" style="letter-spacing:.16em;text-indent:.16em;">LOOM</h2></div>
+      <div class="clip"><h3 class="d-m c-accent" id="clq" style="margin-top:26px;margin-bottom:34px;">Fragen?</h3></div>
+      <p class="body c-silver" id="clth" style="max-width:460px;">Vielen Dank für die Aufmerksamkeit.</p>
+    </div>
+    <p class="closing-credit">LOOM — Advolution Pro Masterclass · 2026</p>
+  </section>
+
+  <script>
+  'use strict';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const $  = (s, c = document) => c.querySelector(s);
+  const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+  const isMobile  = () => window.innerWidth < 768;
+  const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isFine    = window.matchMedia('(pointer: fine)').matches;
+
+  /* ────────── LENIS SMOOTH SCROLL (angepasst für "Schwere") ────────── */
+  let lenis = null;
+  if (!isReduced && typeof Lenis !== 'undefined') {
+    lenis = new Lenis({
+      lerp: 0.06, /* minimal träger für das "schwere" Luxusgefühl */
+      wheelMultiplier: 0.9,
+      smoothWheel: true,
+      smoothTouch: false,
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+  const scrollTo = el => {
+    if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.3 });
+    else el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  /* ────────── PRELOADER ────────── */
+  (function preloader() {
+    const loader  = $('#loader');
+    const curtain = $('#loader-curtain');
+    if (!loader) return;
+    if (lenis) lenis.stop();
+
+    if (isReduced) {
+      loader.style.display = 'none';
+      curtain.style.display = 'none';
+      if (lenis) lenis.start();
+      startReveal();
+      return;
+    }
+
+    const p1 = $('#weave-path'), p2 = $('#weave-path2');
+    [p1, p2].forEach(p => {
+      const len = p.getTotalLength();
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+    });
+
+    const countEl = $('#loader-count');
+    const counter = { v: 0 };
+    const tl = gsap.timeline({ onComplete: () => {
+      gsap.to(curtain, {
+        scaleY: 1, transformOrigin: 'bottom', duration: .9, ease: 'power3.inOut',
+        onComplete: () => {
+          loader.style.display = 'none';
+          gsap.set(curtain, { transformOrigin: 'top' });
+          gsap.to(curtain, { scaleY: 0, duration: .9, ease: 'power3.inOut',
+            onComplete: () => { curtain.style.display = 'none'; if (lenis) lenis.start(); ScrollTrigger.refresh(); }
+          });
+          startReveal();
+        }
+      });
+    }});
+
+    tl.to([p1, p2], { strokeDashoffset: 0, duration: 1.7, ease: 'power2.inOut', stagger: .12 }, 0)
+      .to(counter, { v: 100, duration: 1.9, ease: 'power2.inOut',
+            onUpdate: () => countEl.textContent = String(Math.round(counter.v)).padStart(2, '0') }, 0)
+      .to('#loader-brand', { opacity: 1, duration: .8, ease: 'power2.out' }, .5)
+      .to('#loader-sub',   { opacity: 1, duration: .8, ease: 'power2.out' }, .7)
+      .to({}, { duration: .25 });
+  })();
+
+  /* ────────── THREE.JS — driftende Wollfasern ────────── */
+  (function initThree() {
+    if (isMobile() || isReduced || typeof THREE === 'undefined') return;
+    const canvas   = $('#bg-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setClearColor(0x000000, 0);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 3;
+
+    const count     = 1300;
+    const positions = new Float32Array(count * 3);
+    const colors    = new Float32Array(count * 3);
+    const speeds    = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      positions[i*3]   = (Math.random() - .5) * 11;
+      positions[i*3+1] = (Math.random() - .5) * 11;
+      positions[i*3+2] = (Math.random() - .5) * 5;
+      speeds[i]        = .0006 + Math.random() * .0014;
+      const t = Math.random();
+      colors[i*3]   = 0.91 + t * (0.85 - 0.91);
+      colors[i*3+1] = 0.88 + t * (0.74 - 0.88);
+      colors[i*3+2] = 0.84 + t * (0.58 - 0.84);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+    const mat = new THREE.PointsMaterial({ size: .018, vertexColors: true, transparent: true, opacity: .5, sizeAttenuation: true, depthWrite: false });
+    const particles = new THREE.Points(geo, mat);
+    scene.add(particles);
+
+    gsap.to(mat, { opacity: .08, ease: 'none', scrollTrigger: { trigger: 'body', start: 'top top', end: '22% top', scrub: true } });
+
+    document.addEventListener('mousemove', e => {
+      const x = (e.clientX / window.innerWidth  - .5) * .3;
+      const y = (e.clientY / window.innerHeight - .5) * .3;
+      gsap.to(particles.rotation, { x: y * .5, y: x * .5, duration: 3, ease: 'power1.out' });
+    });
+
+    const pos = geo.attributes.position.array;
+    function render() {
+      requestAnimationFrame(render);
+      for (let i = 0; i < count; i++) {
+        pos[i*3+1] += speeds[i];
+        if (pos[i*3+1] > 5.5) pos[i*3+1] = -5.5;
+      }
+      geo.attributes.position.needsUpdate = true;
+      particles.rotation.y += .0002;
+      renderer.render(scene, camera);
+    }
+    render();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  })();
+
+  /* ────────── CURSOR ────────── */
+  (function initCursor() {
+    if (!isFine || isMobile()) return;
+    const dot = $('#cdot'), ring = $('#cring'), label = $('#clabel');
+    let rx = 0, ry = 0, tx = 0, ty = 0;
+    document.addEventListener('mousemove', e => {
+      tx = e.clientX; ty = e.clientY;
+      dot.style.left = tx + 'px'; dot.style.top = ty + 'px';
+      label.style.left = tx + 'px'; label.style.top = (ty - 38) + 'px';
+    });
+    (function loop() {
+      rx += (tx - rx) * .18; ry += (ty - ry) * .18;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(loop);
+    })();
+    $$('a, button, .dot, .tilt-card, .comp-card').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('c-hover'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('c-hover'));
+    });
+  })();
+
+  /* ────────── TEXT SCRAMBLE ────────── */
+  class TextScramble {
+    constructor(el){ this.el = el; this.chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ·—'; this.update = this.update.bind(this); }
+    setText(txt){
+      const p = new Promise(r => this.resolve = r);
+      this.queue = [];
+      for (let i = 0; i < txt.length; i++){
+        const from = this.el.textContent[i] || '';
+        const start = Math.floor(Math.random()*18);
+        const end = start + Math.floor(Math.random()*18);
+        this.queue.push({ from, to: txt[i], start, end });
+      }
+      cancelAnimationFrame(this.raf); this.frame = 0; this.update();
+      return p;
+    }
+    update(){
+      let out = '', done = 0;
+      for (let i = 0; i < this.queue.length; i++){
+        let { from, to, start, end, char } = this.queue[i];
+        if (this.frame >= end){ done++; out += to; }
+        else if (this.frame >= start){
+          if (!char || Math.random() < .28){ char = this.chars[Math.floor(Math.random()*this.chars.length)]; this.queue[i].char = char; }
+          out += `<span style="color:var(--accent-dark)">${char}</span>`;
+        } else out += from;
+      }
+      this.el.innerHTML = out;
+      if (done === this.queue.length) this.resolve();
+      else { this.raf = requestAnimationFrame(this.update); this.frame++; }
+    }
+  }
+  if (!isReduced) {
+    $$('[data-scramble]').forEach(el => {
+      const orig = el.textContent.trim();
+      const sc = new TextScramble(el);
+      el.textContent = '';
+      ScrollTrigger.create({ trigger: el, start: 'top 85%', once: true, onEnter: () => sc.setText(orig) });
+    });
+  }
+
+  /* ────────── TILT CARDS ────────── */
+  if (!isMobile() && !isReduced) {
+    $$('.tilt-card').forEach(card => {
+      card.insertAdjacentHTML('afterbegin', '<div class="card-shine" aria-hidden="true"></div>');
+      const shine = card.querySelector('.card-shine');
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - .5;
+        const y = (e.clientY - r.top) / r.height - .5;
+        gsap.to(card, { rotateY: x * 10, rotateX: -y * 7, transformPerspective: 900, duration: .4, ease: 'power2.out' });
+        gsap.to(shine, { x: x * 60, y: y * 60, opacity: .09, duration: .4 });
+      });
+      card.addEventListener('mouseleave', () => {
+        gsap.to(card, { rotateY: 0, rotateX: 0, duration: .8, ease: 'power2.out' });
+        gsap.to(shine, { opacity: 0, duration: .4 });
+      });
+    });
+  }
+
+  /* ────────── MAGNETIC DOTS ────────── */
+  if (!isMobile() && !isReduced) {
+    $$('.dot').forEach(btn => {
+      btn.addEventListener('mousemove', e => {
+        const r = btn.getBoundingClientRect();
+        gsap.to(btn, { x:(e.clientX-r.left-r.width/2)*.4, y:(e.clientY-r.top-r.height/2)*.4, duration:.4, ease:'power2.out' });
+      });
+      btn.addEventListener('mouseleave', () => gsap.to(btn, { x:0, y:0, duration:.7, ease:'elastic.out(1,.4)' }));
+    });
+  }
+
+  /* ────────── CHAPTER TRACKING + NAV ────────── */
+  const chapters = [
+    { anchor:'cover', label:'Intro', idx:0 },
+    { anchor:'gesicht', label:'Persona', idx:1 },
+    { anchor:'markt', label:'Produkte', idx:2 },
+    { anchor:'brand-break', label:'Strategie', idx:3 },
+    { anchor:'mindset', label:'Finale', idx:4 },
+  ];
+  function setChapter(i){
+    $$('.dot').forEach((d,k) => d.classList.toggle('active', k===i));
+    const ch = $('#mob-ch'); if (ch) ch.textContent = chapters[i]?.label || '';
+  }
+  chapters.forEach(({anchor, idx}) => {
+    ScrollTrigger.create({ trigger:`#${anchor}`, start:'top 60%', end:'bottom 60%',
+      onEnter:() => setChapter(idx), onEnterBack:() => setChapter(idx) });
+  });
+  $$('.dot').forEach(d => {
+    d.addEventListener('click', () => { const t = document.getElementById(d.dataset.target); if (t) scrollTo(t); });
+    d.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' '){ e.preventDefault(); const t=document.getElementById(d.dataset.target); if(t) scrollTo(t);} });
+  });
+
+  /* ────────── THREAD / PROGRESS (Horizontal Top Bar) ────────── */
+  gsap.to('#thread-fill', { scaleX:1, ease:'none', scrollTrigger:{ trigger:'body', start:'top top', end:'bottom bottom', scrub:true } });
+
+  /* ────────── REVEAL HELPER ────────── */
+  function startReveal(){ ScrollTrigger.refresh(); }
+
+  /* ────────── MAIN ANIMATIONS ────────── */
+  const mm = gsap.matchMedia();
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+
+    /* COVER */
+    const covTl = gsap.timeline({ defaults:{ ease:'power3.out' }, delay:.2 });
+    covTl
+      .from(['#hl1','#hl2'], { yPercent:115, duration:1.3, stagger:.14 })
+      .from('#cov-lbl', { opacity:0, y:18, duration:.9 }, '-=.8')
+      .from('#cov-sub', { opacity:0, y:18, duration:.9 }, '-=.7')
+      .from('.cover-qr', { opacity:0, x:20, duration:.9 }, '-=.6')
+      .from('.scroll-cue', { opacity:0, duration:.7 }, '-=.4');
+
+    gsap.to('#cover-bg', { yPercent:22, ease:'none', scrollTrigger:{ trigger:'#cover', start:'top top', end:'bottom top', scrub:true } });
+
+    /* PROBLEM */
+    gsap.from('.prob-left', { x:-50, opacity:0, duration:1.3, ease:'power2.out', scrollTrigger:{ trigger:'#problem', start:'top 80%' } });
+    gsap.from('.prob-right > *', { y:50, opacity:0, duration:1.1, stagger:.16, ease:'power2.out', scrollTrigger:{ trigger:'#problem', start:'top 78%' } });
+    gsap.from('.rule', { scaleX:0, transformOrigin:'left', duration:1.5, ease:'power3.inOut', scrollTrigger:{ trigger:'.rule', start:'top 85%' } });
+    ScrollTrigger.create({ trigger:'#s10', start:'top 80%', once:true, onEnter:() => {
+      const o = { v:0 };
+      gsap.to(o, { v:73, duration:2, ease:'power1.inOut',
+        onUpdate:() => $('#s10').textContent = Math.round(o.v) });
+      gsap.to('#gapbar', { width:'73%', duration:2, ease:'power1.inOut' });
+    }});
+
+    /* TENSION */
+    gsap.from('.tline', { yPercent:115, duration:1.4, stagger:.16, ease:'power3.out', scrollTrigger:{ trigger:'#tension', start:'top 78%' } });
+    gsap.from('#tcta', { opacity:0, y:24, duration:1, ease:'power2.out', scrollTrigger:{ trigger:'#tcta', start:'top 90%' } });
+
+    /* MARQUEE — scroll-velocity gekoppelt */
+    let mqX = 0;
+    const mqTrack = $('#mq-track');
+    const baseDir = -1;
+    gsap.ticker.add(() => {
+      const v = lenis ? (lenis.velocity || 0) : 0;
+      mqX += (baseDir * 1.1) + (-v * 0.35);
+      const half = mqTrack.scrollWidth / 2;
+      if (mqX <= -half) mqX += half;
+      if (mqX > 0) mqX -= half;
+      mqTrack.style.transform = `translate3d(${mqX}px,0,0)`;
+    });
+
+    /* DAS GESICHT — Portrait-Reveal, Scale-Parallax, Sheen, Karten */
+    gsap.to('#monolith', { clipPath:'inset(0 0 0% 0)', duration:1.5, ease:'power3.inOut',
+      scrollTrigger:{ trigger:'#gesicht', start:'top 60%', once:true } });
+
+    gsap.to('#monolith img', { scale:1, ease:'none',
+      scrollTrigger:{ trigger:'#gesicht', start:'top top', end:'bottom bottom', scrub:true } });
+    gsap.fromTo('#monolith', { y:40 }, { y:-40, ease:'none',
+      scrollTrigger:{ trigger:'#gesicht', start:'top top', end:'bottom bottom', scrub:true } });
+
+    gsap.fromTo('#monolith-sheen', { xPercent:-120 }, { xPercent:120, ease:'none',
+      scrollTrigger:{ trigger:'#gesicht', start:'top top', end:'bottom bottom', scrub:1.2 } });
+
+    $$('#gesicht .ges-step').forEach(step => {
+      const box = step.querySelector('[data-ges]');
+      const fromX = step.classList.contains('right') ? 60 : -60;
+      gsap.fromTo(box,
+        { opacity:0, y:50, x:fromX },
+        { opacity:1, y:0, x:0, duration:1.1, ease:'power3.out',
+          scrollTrigger:{ trigger:step, start:'top 72%' } });
+    });
+    gsap.from('.ges-intro > *', { opacity:0, y:24, duration:1, stagger:.14, ease:'power2.out',
+      scrollTrigger:{ trigger:'#gesicht', start:'top 75%' } });
+
+    /* FARBWELT */
+    $$('#farben [data-swatch]').forEach((sw, i) => {
+      gsap.from(sw, { opacity:0, y:60, duration:.9, ease:'power3.out', delay:i*.06,
+        scrollTrigger:{ trigger:'.swatch-grid', start:'top 82%' } });
+    });
+    gsap.from('.farben-note > div', { opacity:0, y:30, duration:1, stagger:.18, ease:'power2.out',
+      scrollTrigger:{ trigger:'.farben-note', start:'top 85%' } });
+
+    /* MARKT */
+    gsap.from('#markt > .inner > div:first-child', { y:40, opacity:0, duration:1.1, ease:'power2.out', scrollTrigger:{ trigger:'#markt', start:'top 80%' } });
+    gsap.from('.stat-card', { y:60, opacity:0, duration:1, stagger:.13, ease:'power2.out', scrollTrigger:{ trigger:'.stat-cards', start:'top 82%' } });
+
+    function counter(id, end, prefix, suffix, dec, dur){
+      ScrollTrigger.create({ trigger:`#${id}`, start:'top 84%', once:true, onEnter:() => {
+        const el = document.getElementById(id), o = { v:0 };
+        gsap.to(o, { v:end, duration:dur, ease:'power1.inOut',
+          onUpdate:() => el.textContent = prefix + o.v.toFixed(dec) + suffix,
+          onComplete:() => el.textContent = prefix + end.toFixed(dec) + suffix });
+      }});
+    }
+    counter('sm1', 4.2, '€', ' Mrd.', 1, 2.0);
+    counter('sm2', 8.3, '+', '%', 1, 1.8);
+    counter('sm3', 850, '€', '+', 0, 2.2);
+
+    gsap.from('.pcard, .config-card', { y:60, opacity:0, duration:1, stagger:.18, ease:'power2.out', scrollTrigger:{ trigger:'.pcards', start:'top 84%' } });
+
+    /* BRAND BREAK */
+    gsap.from('#bb-num', { opacity:0, y:40, duration:1, ease:'power2.out', scrollTrigger:{ trigger:'#brand-break', start:'top 80%' } });
+    gsap.from('.bbl', { yPercent:115, duration:1.4, stagger:.16, ease:'power3.out', scrollTrigger:{ trigger:'#brand-break', start:'top 80%' } });
+    gsap.from('#bb-sub', { opacity:0, y:26, duration:1, ease:'power2.out', scrollTrigger:{ trigger:'#bb-sub', start:'top 90%' } });
+
+    /* ZIELGRUPPE */
+    gsap.from('#zg-q', { y:70, opacity:0, duration:1.4, ease:'power3.out', scrollTrigger:{ trigger:'#zielgruppe', start:'top 78%' } });
+    gsap.from('.target-img', { y:50, opacity:0, duration:1.1, stagger:.14, ease:'power2.out', scrollTrigger:{ trigger:'.target-images', start:'top 84%' } });
+    gsap.from('.zg-card', { y:60, opacity:0, duration:1, stagger:.16, ease:'power2.out', scrollTrigger:{ trigger:'.zg-cards', start:'top 84%' } });
+    gsap.from('.clem-row', { x:-40, opacity:0, duration:1, stagger:.16, ease:'power2.out', scrollTrigger:{ trigger:'.clem-rows', start:'top 84%' } });
+
+  /* ────────── KONKURRENZ — HORIZONTAL (BUGFIX: Smooth Pinning) ────────── */
+  if (!isMobile()) {
+      const kTrack = $('#konkurrenz-track');
+      const kOuter = $('#konkurrenz-outer'); 
+      
+      const padH = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pad-h')) || 84;
+      const dist = () => kTrack.scrollWidth - window.innerWidth + (padH() * 2);
+
+      gsap.to(kTrack, {
+        x: () => -dist(), 
+        ease: 'none',
+        scrollTrigger: {
+          trigger: kOuter,      // Trigger ist jetzt der Outer-Wrapper
+          start: 'top top',
+          end: () => `+=${dist() + 200}`, // Exakte Breite + 200px Puffer für sanften Auslauf
+          pin: true,            // WICHTIG: Wir pinnen den Trigger selbst, nicht das Child!
+          anticipatePin: 1,     // 💥 DAS IST DER FIX: Bereitet das Rastern vor, killt den Jitter
+          scrub: true,          // Bei Lenis Smooth-Scroll IMMER 'true' statt Zahlen, um Konflikte zu vermeiden
+          invalidateOnRefresh: true,
+          onUpdate: self => $('#loom-karte').classList.toggle('illuminated', self.progress > .60)
+        }
+      });
+    }
+
+    /* HALO */
+    gsap.to('.halo-image', { clipPath:'inset(0 0% 0 0)', duration:1.5, ease:'power3.inOut', scrollTrigger:{ trigger:'.halo-image', start:'top 82%', once:true } });
+    gsap.from('.halo-lead', { opacity:0, y:30, duration:1, ease:'power2.out', scrollTrigger:{ trigger:'.halo-lead', start:'top 86%' } });
+    gsap.from('.hstep', { x:-50, opacity:0, duration:1, stagger:.18, ease:'power2.out', scrollTrigger:{ trigger:'.halo-steps', start:'top 84%' } });
+
+    /* PREIS — Pin + Parallax (desktop only; anticipatePin gegen Lenis-Jitter) */
+    if (!isMobile()) {
+      ScrollTrigger.create({ trigger:'#preis', start:'top top', end:'+=120%', pin:true, pinSpacing:true, anticipatePin: 1 });
+      gsap.to('#preis-bg', { y:-80, ease:'none', scrollTrigger:{ trigger:'#preis', start:'top top', end:'+=120%', scrub:true } });
+    }
+    gsap.from('.pl', { yPercent:115, duration:1.6, stagger:.22, ease:'power3.out', scrollTrigger:{ trigger:'#preis', start:'top 80%' } });
+    gsap.from('#pd', { opacity:0, x:-30, duration:1.1, ease:'power2.out', scrollTrigger:{ trigger:'#pd', start:'top 88%' } });
+    gsap.from('.ppt', { opacity:0, y:24, duration:.9, stagger:.14, ease:'power2.out', scrollTrigger:{ trigger:'#pp', start:'top 90%' } });
+
+    /* JOURNEY */
+    gsap.from('.fstep', { scaleY:0, transformOrigin:'bottom', duration:1, stagger:.13, ease:'power2.out', scrollTrigger:{ trigger:'#funnel', start:'top 84%' } });
+
+    /* CONTENT */
+    gsap.from('.ccard', { y:60, opacity:0, duration:1, stagger:.18, ease:'power2.out', scrollTrigger:{ trigger:'.cgrid', start:'top 84%' } });
+
+    /* MINDSET */
+    gsap.from('#mq1', { yPercent:115, duration:1.4, ease:'power3.out', scrollTrigger:{ trigger:'#mindset', start:'top 78%' } });
+    gsap.from('#mq2', { yPercent:115, duration:1.4, delay:.2, ease:'power3.out', scrollTrigger:{ trigger:'#mindset', start:'top 78%' } });
+    gsap.from('#mqs', { opacity:0, duration:1, ease:'power2.out', scrollTrigger:{ trigger:'#mqs', start:'top 90%' } });
+
+    /* CLOSING */
+    gsap.to('#closing-bg', { scale:1, duration:2, ease:'power2.out', scrollTrigger:{ trigger:'#closing', start:'top 80%', once:true } });
+    gsap.from('#clt', { yPercent:115, duration:1.6, ease:'power3.out', scrollTrigger:{ trigger:'#closing', start:'top 78%' } });
+    gsap.from('#clq', { yPercent:115, duration:1.3, delay:.2, ease:'power3.out', scrollTrigger:{ trigger:'#closing', start:'top 78%' } });
+    gsap.from(['#clth', '.closing-credit'], { opacity:0, y:20, duration:1, stagger:.18, ease:'power2.out', scrollTrigger:{ trigger:'#closing', start:'top 74%' } });
+  });
+
+  /* ────────── RESIZE / FONTS ────────── */
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => ScrollTrigger.refresh(), 200); });
+  document.fonts.ready.then(() => ScrollTrigger.refresh());
+  </script>
+</body>
+</html>
