@@ -588,6 +588,113 @@
     #closing .bg-gl, #closing .inner { z-index: 2; position: relative; }
 
     /* ═══════════════════════════════════════════════════════════
+       CINEMATIC MANIFESTO
+    ═══════════════════════════════════════════════════════════ */
+    .loom-cinematic-manifesto {
+      position: relative;
+      z-index: 1;
+      background-color: var(--black);
+      background-image:
+        linear-gradient(rgba(8,8,7,.72), rgba(8,8,7,.82)),
+        url('https://cdn02.plentymarkets.com/shf6dsifatyv/frontend/hf_20260609_130017_2a7d55ca-061d-49e4-8c8a-03b01ab158bd__1_.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      overflow: hidden;
+    }
+    .cinematic-overlay {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(196,168,130,.10), transparent 60%),
+        linear-gradient(to bottom, rgba(8,8,7,.7) 0%, transparent 22%, transparent 78%, rgba(8,8,7,.92) 100%);
+    }
+    .cinematic-grid {
+      position: relative; z-index: 2;
+      max-width: var(--max-w); margin: 0 auto;
+      padding: var(--pad-v) var(--pad-h);
+      display: grid; grid-template-columns: 5fr 7fr; gap: 72px;
+      align-items: start;
+    }
+    .cinematic-intro { position: relative; }
+    .cinematic-intro .sticky-wrapper { position: sticky; top: 14vh; }
+    .manifesto-kicker {
+      display: inline-flex; align-items: center; gap: 14px;
+      font-size: 14px; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 26px;
+    }
+    .manifesto-kicker::before {
+      content: ''; width: 32px; height: 1px; background: var(--accent-dark);
+    }
+    .manifesto-headline {
+      font-family: var(--font-display); font-weight: 600;
+      font-size: clamp(38px, 4vw, 54px); line-height: 1.1;
+      color: var(--cream); margin-bottom: 32px;
+    }
+    .manifesto-accent {
+      width: 64px; height: 2px; background: var(--accent);
+      margin-bottom: 32px;
+    }
+    .manifesto-summary {
+      font-size: 19px; line-height: 1.75; color: var(--silver);
+      max-width: 460px;
+    }
+    .cinematic-cards {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    }
+    .glass-card {
+      position: relative; padding: 40px 34px 42px;
+      background: rgba(15,14,13,.55);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,.06);
+      border-top: 2px solid var(--accent);
+      box-shadow: 0 30px 80px rgba(0,0,0,.5);
+      transition: transform .5s var(--ease-out), border-color .4s, box-shadow .5s;
+    }
+    .glass-card:hover {
+      transform: translateY(-6px);
+      border-top-color: var(--accent-bright);
+      box-shadow: 0 44px 100px rgba(0,0,0,.62);
+    }
+    .glass-card .card-number {
+      display: block; font-family: var(--font-display); font-weight: 700;
+      font-size: 40px; line-height: 1; color: var(--stone); margin-bottom: 18px;
+    }
+    .glass-card h3 {
+      font-family: var(--font-display); font-weight: 600;
+      font-size: clamp(22px, 2.4vw, 28px); line-height: 1.18;
+      color: var(--cream); margin-bottom: 16px;
+    }
+    .glass-card p {
+      font-size: 17px; line-height: 1.68; color: var(--silver);
+    }
+    .reveal-up {
+      opacity: 0; transform: translateY(40px);
+      animation: cm-reveal-up .9s var(--ease-out) forwards;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+    @keyframes cm-reveal-up {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Fallback for browsers without scroll-driven animations */
+    @supports not (animation-timeline: view()) {
+      .reveal-up { opacity: 1; transform: none; animation: none; }
+    }
+    @media (max-width: 1024px) {
+      .cinematic-grid { grid-template-columns: 1fr; gap: 48px; }
+      .cinematic-intro .sticky-wrapper { position: relative; top: 0; }
+    }
+    @media (max-width: 768px) {
+      .loom-cinematic-manifesto { background-attachment: scroll; }
+      .cinematic-cards { grid-template-columns: 1fr; }
+      .manifesto-summary { max-width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .loom-cinematic-manifesto { background-attachment: scroll; }
+      .reveal-up { opacity: 1; transform: none; animation: none; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
        RESPONSIVE
     ═══════════════════════════════════════════════════════════ */
     @media (max-width: 1024px) {
@@ -827,6 +934,54 @@
       </div>
 
       <div class="ges-spacer-bot"></div>
+    </div>
+  </section>
+
+  <section class="loom-cinematic-manifesto">
+    <div class="cinematic-overlay"></div>
+    <div class="cinematic-grid">
+        <div class="cinematic-intro">
+            <div class="sticky-wrapper">
+                <span class="manifesto-kicker">Das Manifest</span>
+                <h2 class="manifesto-headline">Wir weben den Rhythmus der Verlangsamung.</h2>
+                <div class="manifesto-accent"></div>
+                <p class="manifesto-summary">
+                    Loom schafft architektonische Ankerpunkte für Menschen, die bewusst konsumieren und das Rohe suchen. Wir verbinden alpines Traditionshandwerk, kompromisslose Nachhaltigkeit und zeitlosen Minimalismus. Unser Versprechen: Naturprodukte, die Räumen eine Seele geben und jeden Tag spürbaren Luxus bieten.
+                </p>
+            </div>
+        </div>
+        <div class="cinematic-cards">
+            <div class="glass-card reveal-up">
+                <span class="card-number">01</span>
+                <h3>Was machen wir?</h3>
+                <p>Wir kreieren stilvolle, haptische Meisterwerke aus 100% naturbelassener Schafschurwolle – von traditionell nass gewalkten Patschen bis hin zu massiven, raumprägenden Teppichen.</p>
+            </div>
+            <div class="glass-card reveal-up" style="animation-delay: 0.1s;">
+                <span class="card-number">02</span>
+                <h3>Für wen?</h3>
+                <p>Für Ästheten und Liebhaber von echtem Handwerk, die keine massenproduzierten Kompromisse eingehen, sondern zeitloses Design, bewussten Konsum und authentische Materialien schätzen.</p>
+            </div>
+            <div class="glass-card reveal-up" style="animation-delay: 0.2s;">
+                <span class="card-number">03</span>
+                <h3>Welchen Nutzen schaffen wir?</h3>
+                <p>Wir verleihen kühler Architektur eine warme Seele und akustische Ruhe, während wir ein unvergleichliches Barfuß-Gefühl für den täglichen Rückzugsort schaffen.</p>
+            </div>
+            <div class="glass-card reveal-up" style="animation-delay: 0.1s;">
+                <span class="card-number">04</span>
+                <h3>Wofür stehen wir?</h3>
+                <p>Für radikale Regionalität, österreichisches Handwerk, kompromisslose Qualität und tief verwurzelte Nachhaltigkeit – organisch, plastikfrei und ehrlich.</p>
+            </div>
+            <div class="glass-card reveal-up" style="animation-delay: 0.2s;">
+                <span class="card-number">05</span>
+                <h3>Wahrnehmung</h3>
+                <p>Als Premium-Marke, bei der alpines Erbe auf High-End-Design trifft. Vertrauenswürdig, authentisch, stilvoll und mit einem kompromisslosen Gespür für Details.</p>
+            </div>
+            <div class="glass-card reveal-up" style="animation-delay: 0.3s;">
+                <span class="card-number">06</span>
+                <h3>Das Versprechen</h3>
+                <p>Textilien, die halten, was sie haptisch versprechen. Spürbare Qualität, absolute Transparenz in der Herkunft und zeitlose Designs, die niemals aus der Mode kommen.</p>
+            </div>
+        </div>
     </div>
   </section>
 
@@ -1622,100 +1777,6 @@
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => ScrollTrigger.refresh(), 200); });
   document.fonts.ready.then(() => ScrollTrigger.refresh());
   window.addEventListener('load', () => { ScrollTrigger.refresh(); });
-
-  /* ════════════════════════════════════════════════════════════
-     PRESENTATION MODE — Swipe-Navigation (Touch-Board)
-     Horizontal + vertical swipes glide section-to-section via Lenis.
-  ════════════════════════════════════════════════════════════ */
-  (function presentationMode() {
-    // Ordered flow of major sections. #konkurrenz-outer counts as one stop;
-    // its internal horizontal pinning stays fully intact because we only
-    // scroll to native section offsets and let ScrollTrigger drive the pin.
-    const SECTION_IDS = [
-      '#cover', '#problem', '#tension', '#gesicht', '#markt',
-      '#brand-break', '#farben', '#zielgruppe', '#konkurrenz-outer',
-      '#halo', '#preis', '#journey', '#content-strat', '#mindset', '#closing',
-    ];
-
-    const sections = SECTION_IDS
-      .map(id => document.querySelector(id))
-      .filter(Boolean);
-    if (sections.length < 2) return;
-
-    const SWIPE_THRESHOLD = 50;   // min px before a swipe registers
-    const FLIGHT_MS       = 1500; // glide duration; matches Lenis duration
-    let isAnimating = false;      // debounce lock during a flight
-    let startX = 0, startY = 0;
-
-    // Find the section whose top edge sits closest to the viewport top (0px).
-    function getCurrentSectionIndex() {
-      let closest = 0;
-      let minDist = Infinity;
-      for (let i = 0; i < sections.length; i++) {
-        const dist = Math.abs(sections[i].getBoundingClientRect().top);
-        if (dist < minDist) { minDist = dist; closest = i; }
-      }
-      return closest;
-    }
-
-    function goToSection(index) {
-      if (index < 0 || index >= sections.length) return;
-      isAnimating = true;
-      const target = sections[index];
-
-      if (lenis) {
-        lenis.scrollTo(target, {
-          duration: FLIGHT_MS / 1000,
-          lock: true,
-          // After the flight, force a ScrollTrigger sync so no trigger along
-          // the path is stuck in a broken intermediate state.
-          onComplete: () => { ScrollTrigger.update(); },
-        });
-      } else {
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-
-      setTimeout(() => {
-        isAnimating = false;
-        ScrollTrigger.update();   // settle all triggers to their true state
-      }, FLIGHT_MS);
-    }
-
-    function navigate(direction) {
-      if (isAnimating) return;
-      const current = getCurrentSectionIndex();
-      goToSection(current + direction);
-    }
-
-    window.addEventListener('touchstart', e => {
-      if (!e.changedTouches || !e.changedTouches.length) return;
-      startX = e.changedTouches[0].clientX;
-      startY = e.changedTouches[0].clientY;
-    }, { passive: true });
-
-    window.addEventListener('touchend', e => {
-      if (isAnimating || !e.changedTouches || !e.changedTouches.length) return;
-
-      const deltaX = e.changedTouches[0].clientX - startX;
-      const deltaY = e.changedTouches[0].clientY - startY;
-      const absX = Math.abs(deltaX);
-      const absY = Math.abs(deltaY);
-
-      // Ignore taps / micro-movements below the threshold.
-      if (absX < SWIPE_THRESHOLD && absY < SWIPE_THRESHOLD) return;
-
-      // Pick the dominant axis, then map to next/prev.
-      // Swipe LEFT or UP → Next; swipe RIGHT or DOWN → Previous.
-      let direction;
-      if (absX > absY) {
-        direction = deltaX < 0 ? 1 : -1;
-      } else {
-        direction = deltaY < 0 ? 1 : -1;
-      }
-
-      navigate(direction);
-    }, { passive: true });
-  })();
   </script>
 </body>
 </html>
