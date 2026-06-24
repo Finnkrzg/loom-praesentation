@@ -277,19 +277,19 @@
       box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
     }
     .cover-qr-code {
-      width: 72px; height: 72px; flex-shrink: 0;
+      width: 96px; height: 96px; flex-shrink: 0;
       background: rgba(234, 227, 212, .06);
       border: 1px solid rgba(196, 168, 130, .22);
       display: grid; place-items: center; padding: 6px;
     }
     .cover-qr-code svg { width: 100%; height: 100%; display: block; }
-    .cover-qr-text { display: flex; flex-direction: column; gap: 4px; }
+    .cover-qr-text { display: flex; flex-direction: column; gap: 5px; }
     .cover-qr-label {
-      font-size: 9px; letter-spacing: .18em; text-transform: uppercase;
+      font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
       color: var(--accent); font-weight: 500;
     }
     .cover-qr-hint {
-      font-size: 11px; line-height: 1.45; color: var(--silver); max-width: 130px;
+      font-size: 13px; line-height: 1.45; color: var(--silver); max-width: 150px;
     }
     .hero-perspective { perspective: 1300px; perspective-origin: 50% 50%; margin: 38px 0; }
     .cover-sub { max-width: 460px; }
@@ -808,7 +808,7 @@
     <span class="bg-gl cover-bg-gl" aria-hidden="true">L</span>
 
     <aside class="cover-qr" aria-label="Präsentation am Handy mitverfolgen">
-      <div class="cover-qr-code" aria-hidden="true" style="width: 72px; height: 72px; padding: 4px; background: #EAE3D4; border-radius: 4px;">
+      <div class="cover-qr-code" aria-hidden="true" style="width: 96px; height: 96px; padding: 5px; background: #EAE3D4; border-radius: 4px;">
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://loom-praesentation.vercel.app&color=080807&bgcolor=EAE3D4" alt="QR Code" style="width: 100%; height: 100%; display: block;">
       </div>
       <div class="cover-qr-text">
@@ -1331,8 +1331,8 @@
   let lenis = null;
   if (!isReduced && typeof Lenis !== 'undefined') {
     lenis = new Lenis({
-      lerp: 0.06, /* minimal träger für das "schwere" Luxusgefühl */
-      wheelMultiplier: 1.5,   /* schnelleres Scrollen mit dem Mausrad */
+      lerp: 0.15, /* snappier — weniger Nachlauf für direkteres Scrollen */
+      wheelMultiplier: 1.8,   /* schnelleres Scrollen mit dem Mausrad */
       smoothWheel: true,
       smoothTouch: true,      /* Touch-Board: Lenis fängt Swipes selbst ab */
       touchMultiplier: 3.5,   /* deutlich responsiveres Drag-Gefühl am Touch-Board */
@@ -1747,8 +1747,8 @@
 
     /* PREIS — Pin + Parallax (desktop only; anticipatePin gegen Lenis-Jitter) */
     if (!isMobile()) {
-      ScrollTrigger.create({ trigger:'#preis', start:'top top', end:'+=50%', pin:true, pinSpacing:true, anticipatePin: 1 });
-      gsap.to('#preis-bg', { y:-80, ease:'none', scrollTrigger:{ trigger:'#preis', start:'top top', end:'+=50%', scrub:true } });
+      ScrollTrigger.create({ trigger:'#preis', start:'top top', end:'+=30%', pin:true, pinSpacing:true, anticipatePin: 1 });
+      gsap.to('#preis-bg', { y:-80, ease:'none', scrollTrigger:{ trigger:'#preis', start:'top top', end:'+=30%', scrub:true } });
     }
     gsap.from('.pl', { yPercent:115, duration:1.6, stagger:.22, ease:'power3.out', scrollTrigger:{ trigger:'#preis', start:'top 80%' } });
     gsap.from('#pd', { opacity:0, x:-30, duration:1.1, ease:'power2.out', scrollTrigger:{ trigger:'#pd', start:'top 88%' } });
