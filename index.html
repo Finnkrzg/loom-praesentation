@@ -379,7 +379,7 @@
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255,255,255,.05); border-top: 2px solid var(--accent);
       box-shadow: 0 40px 90px rgba(0,0,0,.6);
-      opacity: 0; will-change: transform, opacity;
+      will-change: transform, opacity;
     }
     .ges-box .chapter-tag { display: block; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin-bottom: 22px; }
     .ges-box h3 { font-family: var(--font-display); font-size: clamp(26px,3vw,34px); font-weight: 600; line-height: 1.14; color: var(--cream); margin-bottom: 24px; }
@@ -1179,7 +1179,8 @@
       lerp: 0.06, /* minimal träger für das "schwere" Luxusgefühl */
       wheelMultiplier: 0.9,
       smoothWheel: true,
-      smoothTouch: false,
+      smoothTouch: true,      /* Touch-Board: Lenis fängt Swipes selbst ab */
+      touchMultiplier: 2,     /* responsives Drag-Gefühl auf großem Screen */
     });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(t => lenis.raf(t * 1000));
@@ -1521,7 +1522,12 @@
       gsap.fromTo(box,
         { opacity:0, y:50, x:fromX },
         { opacity:1, y:0, x:0, duration:1.1, ease:'power3.out',
-          scrollTrigger:{ trigger:step, start:'top 72%' } });
+          scrollTrigger:{
+            trigger:step,
+            start:'top 72%',
+            toggleActions:'play none none reverse',
+            fastScrollEnd:true,   /* schnelles Vorbeiscrollen → sofort Endzustand */
+          } });
     });
     gsap.from('.ges-intro > *', { opacity:0, y:24, duration:1, stagger:.14, ease:'power2.out',
       scrollTrigger:{ trigger:'#gesicht', start:'top 75%' } });
@@ -1658,12 +1664,21 @@
       const target = sections[index];
 
       if (lenis) {
-        lenis.scrollTo(target, { duration: FLIGHT_MS / 1000, lock: true });
+        lenis.scrollTo(target, {
+          duration: FLIGHT_MS / 1000,
+          lock: true,
+          // After the flight, force a ScrollTrigger sync so no trigger along
+          // the path is stuck in a broken intermediate state.
+          onComplete: () => { ScrollTrigger.update(); },
+        });
       } else {
         target.scrollIntoView({ behavior: 'smooth' });
       }
 
-      setTimeout(() => { isAnimating = false; }, FLIGHT_MS);
+      setTimeout(() => {
+        isAnimating = false;
+        ScrollTrigger.update();   // settle all triggers to their true state
+      }, FLIGHT_MS);
     }
 
     function navigate(direction) {
