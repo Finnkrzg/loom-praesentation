@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="./images/Hauptbanner-1920-1080.jpg" fetchpriority="high">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -36,9 +37,9 @@
       --font-display:  'Cormorant Garamond', serif;
       --font-body:     'Inter', sans-serif;
 
-      --text-xl:  clamp(72px, 10vw, 150px);
-      --text-l:   clamp(46px, 6vw, 92px);
-      --text-m:   clamp(30px, 4vw, 54px);
+      --text-xl:  clamp(88px, 10vw, 150px);
+      --text-l:   clamp(56px, 6vw, 92px);
+      --text-m:   clamp(38px, 4vw, 54px);
 
       --pad-v: 140px;
       --pad-h: 84px;
@@ -222,8 +223,8 @@
     .d-l  { font-family: var(--font-display); font-size: var(--text-l);  font-weight: 600; line-height: 1.02; }
     .d-m  { font-family: var(--font-display); font-size: var(--text-m);  font-weight: 600; line-height: 1.12; }
     .stat { font-family: var(--font-display); font-size: clamp(64px,8vw,128px); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-    .lbl  { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; font-weight: 400; }
-    .body { font-size: 18px; line-height: 1.74; font-weight: 300; }
+    .lbl  { font-size: 14px; letter-spacing: .2em; text-transform: uppercase; font-weight: 400; }
+    .body { font-size: 22px; line-height: 1.7; font-weight: 300; }
 
     .c-cream{color:var(--cream)} .c-accent{color:var(--accent)} .c-accent-b{color:var(--accent-bright)}
     .c-dark-a{color:var(--accent-dark)} .c-light{color:var(--light)} .c-silver{color:var(--silver)}
@@ -426,7 +427,7 @@
     .stat-card::after { content:''; position:absolute; bottom:0; left:0; width:100%; height:2px; background:linear-gradient(90deg,var(--accent),transparent); transform:scaleX(0); transform-origin:left; transition:transform .7s var(--ease-out); }
     .stat-card:hover::after { transform: scaleX(1); }
     .sc-sub { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .sc-lbl { margin-top: 22px; font-size: 13px; line-height: 1.55; color: var(--silver); }
+    .sc-lbl { margin-top: 22px; font-size: 18px; line-height: 1.65; color: var(--silver); }
     .pdiv { display: flex; align-items: center; gap: 24px; margin-bottom: 44px; }
     .pdiv-line { flex: 1; height: 1px; background: var(--stone); }
     
@@ -443,7 +444,7 @@
     .ptag { display: inline-block; border: 1px solid var(--accent); color: var(--accent); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; padding: 5px 12px; margin-bottom: 16px; }
     .pname { color: var(--cream); margin-bottom: 26px; }
     .pspecs { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 36px; }
-    .pspecs li { font-size: 15px; color: var(--silver); padding-left: 20px; position: relative; }
+    .pspecs li { font-size: 18px; line-height: 1.65; color: var(--silver); padding-left: 20px; position: relative; }
     .pspecs li::before { content: '—'; position: absolute; left: 0; color: var(--accent-dark); }
     .pprice { font-family: var(--font-display); font-size: clamp(32px,4vw,48px); font-weight: 600; color: var(--cream); }
     .pprice sup { font-size: .42em; vertical-align: super; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; font-family: var(--font-body); font-weight: 300; }
@@ -479,7 +480,7 @@
     .clem-rows { display: flex; flex-direction: column; max-width: 880px; position: relative; z-index: 2; }
     .clem-row { display: grid; grid-template-columns: 240px 1fr; gap: 48px; padding: 42px 0; border-bottom: 1px solid var(--stone); align-items: start; }
     .clem-row:first-child { border-top: 1px solid var(--stone); }
-    .clem-txt { font-size: 16px; color: var(--silver); line-height: 1.74; }
+    .clem-txt { font-size: 18px; color: var(--silver); line-height: 1.7; }
     .clem-txt strong { color: var(--cream); font-weight: 400; }
 
     /* ═══════════════════════════════════════════════════════════
@@ -525,7 +526,7 @@
     .preis-pts { display: flex; flex-direction: column; gap: 22px; max-width: 700px; }
     .ppt { display: grid; grid-template-columns: 36px 1fr; gap: 20px; align-items: start; }
     .ppt-num { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--accent-dark); padding-top: 2px; }
-    .ppt-txt { font-size: 16px; color: var(--silver); line-height: 1.66; }
+    .ppt-txt { font-size: 18px; color: var(--silver); line-height: 1.65; }
     .ppt-txt strong { color: var(--light); font-weight: 400; }
 
     /* ═══════════════════════════════════════════════════════════
@@ -538,7 +539,7 @@
     .fstep:hover::before { opacity: 1; }
     .fstep-tag { color: var(--muted); margin-bottom: 14px; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
     .fstep-title { font-family: var(--font-display); font-size: clamp(22px,2.5vw,32px); font-weight: 600; color: var(--cream); margin-bottom: 18px; }
-    .fstep-body { font-size: 14px; color: var(--silver); line-height: 1.66; }
+    .fstep-body { font-size: 18px; color: var(--silver); line-height: 1.65; }
 
     /* ═══════════════════════════════════════════════════════════
        12 CONTENT
@@ -548,8 +549,8 @@
     .ccard { background: var(--dark); padding: 50px 42px; }
     .ci { padding: 19px 0; border-bottom: 1px solid var(--stone); }
     .ci:last-child { border-bottom: none; }
-    .ci-k { font-size: 15px; color: var(--light); margin-bottom: 5px; }
-    .ci-v { font-size: 14px; color: var(--silver); line-height: 1.55; }
+    .ci-k { font-size: 18px; color: var(--light); margin-bottom: 6px; line-height: 1.5; }
+    .ci-v { font-size: 18px; color: var(--silver); line-height: 1.65; }
 
     /* ═══════════════════════════════════════════════════════════
        13 MINDSET
@@ -778,7 +779,7 @@
         <h2 class="ges-title">Wahrer Luxus schreit nicht.<br>Er <em>dämpft</em> den Lärm der Welt.</h2>
       </div>
       <figure class="monolith" id="monolith">
-        <img src="https://cdn02.plentymarkets.com/shf6dsifatyv/frontend/Clemens-Walcher-10.png" alt="Clemens Walcher — Creative Director von LOOM" loading="lazy">
+        <img src="https://cdn02.plentymarkets.com/shf6dsifatyv/frontend/Clemens-Walcher-10.png" alt="Clemens Walcher — Creative Director von LOOM" fetchpriority="high" loading="eager" decoding="async">
         <div class="monolith-sheen" id="monolith-sheen"></div>
         <div class="monolith-grad"></div>
         <figcaption class="monolith-name">Clemens Walcher<span>Creative Director</span></figcaption>
@@ -860,7 +861,7 @@
       </div>
       <div class="pcards">
         <div class="pcard tilt-card">
-          <div class="pcard-img"><img src="./images/Hauptbanner-medi-1920-1080.jpg" alt="LOOM Schafwollteppich mediterran" loading="lazy"></div>
+          <div class="pcard-img"><img src="./images/Hauptbanner-medi-1920-1080.jpg" alt="LOOM Schafwollteppich mediterran" loading="lazy" decoding="async"></div>
           <div class="pcard-body">
             <div class="ptag">Hero Product</div>
             <h3 class="d-m pname">Schafwoll&shy;teppich</h3>
@@ -874,7 +875,7 @@
           </div>
         </div>
         <div class="pcard tilt-card">
-          <div class="pcard-img"><img src="./images/loom-interior-mediteran-ausgang.jpg" alt="LOOM Walkpatschen mediterran" loading="lazy"></div>
+          <div class="pcard-img"><img src="./images/loom-interior-mediteran-ausgang.jpg" alt="LOOM Walkpatschen mediterran" loading="lazy" decoding="async"></div>
           <div class="pcard-body">
             <div class="ptag">Halo Carrier</div>
             <h3 class="d-m pname">Walk&shy;patschen</h3>
@@ -899,14 +900,14 @@
             </ul>
           </div>
           <div class="pcard-img" style="border-radius: 4px; border: 1px solid var(--stone);">
-             <img src="./images/loom-interior-mediteran-essen.png" alt="LOOM Konfigurator Preview" loading="lazy">
+             <img src="./images/loom-interior-mediteran-essen.png" alt="LOOM Konfigurator Preview" loading="lazy" decoding="async">
           </div>
         </div>
       </div>
       
       <div class="market-images">
-        <div class="market-img-wrap"><img src="./images/loom-interior-mediteran-essen.png" alt="LOOM Esszimmer mediterran" loading="lazy"></div>
-        <div class="market-img-wrap"><img src="./images/loom-interior-mediteran-Esszimmer.png" alt="LOOM Teppich Esszimmer" loading="lazy"></div>
+        <div class="market-img-wrap"><img src="./images/loom-interior-mediteran-essen.png" alt="LOOM Esszimmer mediterran" loading="lazy" decoding="async"></div>
+        <div class="market-img-wrap"><img src="./images/loom-interior-mediteran-Esszimmer.png" alt="LOOM Teppich Esszimmer" loading="lazy" decoding="async"></div>
       </div>
     </div>
   </section>
@@ -997,8 +998,8 @@
       <p class="body c-muted" style="max-width:500px;margin-bottom:56px;">Diese Zielgruppe kauft keine Produkte — sie kauft Bedeutung.</p>
 
       <div class="target-images">
-        <div class="target-img"><img src="./images/loom-interior-mediteran-zimmer.png" alt="LOOM Schlafzimmer mediterran" loading="lazy"><p class="img-caption">Der Conscious Aesthete</p></div>
-        <div class="target-img"><img src="./images/loom-interior-mediteran-zimmer-2.png" alt="LOOM Schlafzimmer mediterran 2" loading="lazy"></div>
+        <div class="target-img"><img src="./images/loom-interior-mediteran-zimmer.png" alt="LOOM Schlafzimmer mediterran" loading="lazy" decoding="async"><p class="img-caption">Der Conscious Aesthete</p></div>
+        <div class="target-img"><img src="./images/loom-interior-mediteran-zimmer-2.png" alt="LOOM Schlafzimmer mediterran 2" loading="lazy" decoding="async"></div>
       </div>
 
       <div class="zg-cards">
@@ -1077,7 +1078,7 @@
       <p class="lbl c-accent kicker" style="margin-bottom:18px;" data-scramble>Marketing-Strategie.</p>
       <h2 class="d-m c-cream" style="margin-bottom:22px;">Der «Halo-Effekt».</h2>
       <div class="halo-visual">
-        <img src="./images/loom-warmes-zimmer-banner.png" alt="LOOM warmes Zimmer Abendlicht" loading="lazy" class="halo-image">
+        <img src="./images/loom-warmes-zimmer-banner.png" alt="LOOM warmes Zimmer Abendlicht" loading="lazy" decoding="async" class="halo-image">
       </div>
       <p class="body c-silver halo-lead">
         Wie verkauft man Walkpatschen für €60 an eine anspruchsvolle Zielgruppe?
@@ -1414,6 +1415,50 @@
   /* ────────── REVEAL HELPER ────────── */
   function startReveal(){ ScrollTrigger.refresh(); }
 
+  /* ────────── COUNTER — Chrome-safe (proxy bound to element) ────────── */
+  function initCounter(id, options = {}) {
+    const {
+      end = 0,
+      prefix = '',
+      suffix = '',
+      decimals = 0,
+      duration = 2,
+      triggerStart = 'top 84%',
+      onStart = null,
+    } = options;
+
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const format = (val) => {
+      const n = decimals > 0 ? Number(val).toFixed(decimals) : String(Math.round(val));
+      return `${prefix}${n}${suffix}`;
+    };
+
+    ScrollTrigger.create({
+      trigger: el,
+      start: triggerStart,
+      once: true,
+      onEnter: () => {
+        if (el.dataset.counted === 'true') return;
+        el.dataset.counted = 'true';
+        if (typeof onStart === 'function') onStart();
+
+        const tweenTarget = { val: 0 };
+        el._counterTweenTarget = tweenTarget;
+
+        gsap.to(tweenTarget, {
+          val: end,
+          duration,
+          ease: 'power1.inOut',
+          overwrite: 'auto',
+          onUpdate: () => { el.textContent = format(tweenTarget.val); },
+          onComplete: () => { el.textContent = format(end); },
+        });
+      },
+    });
+  }
+
   /* ────────── MAIN ANIMATIONS ────────── */
   const mm = gsap.matchMedia();
   mm.add('(prefers-reduced-motion: no-preference)', () => {
@@ -1433,12 +1478,13 @@
     gsap.from('.prob-left', { x:-50, opacity:0, duration:1.3, ease:'power2.out', scrollTrigger:{ trigger:'#problem', start:'top 80%' } });
     gsap.from('.prob-right > *', { y:50, opacity:0, duration:1.1, stagger:.16, ease:'power2.out', scrollTrigger:{ trigger:'#problem', start:'top 78%' } });
     gsap.from('.rule', { scaleX:0, transformOrigin:'left', duration:1.5, ease:'power3.inOut', scrollTrigger:{ trigger:'.rule', start:'top 85%' } });
-    ScrollTrigger.create({ trigger:'#s10', start:'top 80%', once:true, onEnter:() => {
-      const o = { v:0 };
-      gsap.to(o, { v:73, duration:2, ease:'power1.inOut',
-        onUpdate:() => $('#s10').textContent = Math.round(o.v) });
-      gsap.to('#gapbar', { width:'73%', duration:2, ease:'power1.inOut' });
-    }});
+    initCounter('s10', {
+      end: 73,
+      decimals: 0,
+      duration: 2,
+      triggerStart: 'top 80%',
+      onStart: () => gsap.to('#gapbar', { width:'73%', duration:2, ease:'power1.inOut' }),
+    });
 
     /* TENSION */
     gsap.from('.tline', { yPercent:115, duration:1.4, stagger:.16, ease:'power3.out', scrollTrigger:{ trigger:'#tension', start:'top 78%' } });
@@ -1492,17 +1538,9 @@
     gsap.from('#markt > .inner > div:first-child', { y:40, opacity:0, duration:1.1, ease:'power2.out', scrollTrigger:{ trigger:'#markt', start:'top 80%' } });
     gsap.from('.stat-card', { y:60, opacity:0, duration:1, stagger:.13, ease:'power2.out', scrollTrigger:{ trigger:'.stat-cards', start:'top 82%' } });
 
-    function counter(id, end, prefix, suffix, dec, dur){
-      ScrollTrigger.create({ trigger:`#${id}`, start:'top 84%', once:true, onEnter:() => {
-        const el = document.getElementById(id), o = { v:0 };
-        gsap.to(o, { v:end, duration:dur, ease:'power1.inOut',
-          onUpdate:() => el.textContent = prefix + o.v.toFixed(dec) + suffix,
-          onComplete:() => el.textContent = prefix + end.toFixed(dec) + suffix });
-      }});
-    }
-    counter('sm1', 4.2, '€', ' Mrd.', 1, 2.0);
-    counter('sm2', 8.3, '+', '%', 1, 1.8);
-    counter('sm3', 850, '€', '+', 0, 2.2);
+    initCounter('sm1', { end: 4.2, prefix: '€', suffix: ' Mrd.', decimals: 1, duration: 2.0 });
+    initCounter('sm2', { end: 8.3, prefix: '+', suffix: '%', decimals: 1, duration: 1.8 });
+    initCounter('sm3', { end: 850, prefix: '€', suffix: '+', decimals: 0, duration: 2.2 });
 
     gsap.from('.pcard, .config-card', { y:60, opacity:0, duration:1, stagger:.18, ease:'power2.out', scrollTrigger:{ trigger:'.pcards', start:'top 84%' } });
 
@@ -1573,10 +1611,11 @@
     gsap.from(['#clth', '.closing-credit'], { opacity:0, y:20, duration:1, stagger:.18, ease:'power2.out', scrollTrigger:{ trigger:'#closing', start:'top 74%' } });
   });
 
-  /* ────────── RESIZE / FONTS ────────── */
+  /* ────────── RESIZE / FONTS / LOAD ────────── */
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => ScrollTrigger.refresh(), 200); });
   document.fonts.ready.then(() => ScrollTrigger.refresh());
+  window.addEventListener('load', () => { ScrollTrigger.refresh(); });
   </script>
 </body>
 </html>
