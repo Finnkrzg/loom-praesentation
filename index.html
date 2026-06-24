@@ -59,7 +59,7 @@
       color: var(--light);
       font-family: var(--font-body);
       font-weight: 300;
-      overflow-x: hidden;
+      overflow-x: clip;
       cursor: none;
     }
 
@@ -615,8 +615,8 @@
       display: grid; grid-template-columns: 5fr 7fr; gap: 72px;
       align-items: start;
     }
-    .cinematic-intro { position: relative; }
-    .cinematic-intro .sticky-wrapper { position: sticky; top: 14vh; }
+    .cinematic-intro { position: relative; height: 100%; }
+    .cinematic-intro .sticky-wrapper { position: sticky; top: 25vh; }
     .manifesto-kicker {
       display: inline-flex; align-items: center; gap: 14px;
       font-size: 14px; letter-spacing: .2em; text-transform: uppercase;
@@ -1332,10 +1332,10 @@
   if (!isReduced && typeof Lenis !== 'undefined') {
     lenis = new Lenis({
       lerp: 0.06, /* minimal träger für das "schwere" Luxusgefühl */
-      wheelMultiplier: 0.9,
+      wheelMultiplier: 1.5,   /* schnelleres Scrollen mit dem Mausrad */
       smoothWheel: true,
       smoothTouch: true,      /* Touch-Board: Lenis fängt Swipes selbst ab */
-      touchMultiplier: 2,     /* responsives Drag-Gefühl auf großem Screen */
+      touchMultiplier: 3.5,   /* deutlich responsiveres Drag-Gefühl am Touch-Board */
     });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(t => lenis.raf(t * 1000));
@@ -1747,8 +1747,8 @@
 
     /* PREIS — Pin + Parallax (desktop only; anticipatePin gegen Lenis-Jitter) */
     if (!isMobile()) {
-      ScrollTrigger.create({ trigger:'#preis', start:'top top', end:'+=120%', pin:true, pinSpacing:true, anticipatePin: 1 });
-      gsap.to('#preis-bg', { y:-80, ease:'none', scrollTrigger:{ trigger:'#preis', start:'top top', end:'+=120%', scrub:true } });
+      ScrollTrigger.create({ trigger:'#preis', start:'top top', end:'+=50%', pin:true, pinSpacing:true, anticipatePin: 1 });
+      gsap.to('#preis-bg', { y:-80, ease:'none', scrollTrigger:{ trigger:'#preis', start:'top top', end:'+=50%', scrub:true } });
     }
     gsap.from('.pl', { yPercent:115, duration:1.6, stagger:.22, ease:'power3.out', scrollTrigger:{ trigger:'#preis', start:'top 80%' } });
     gsap.from('#pd', { opacity:0, x:-30, duration:1.1, ease:'power2.out', scrollTrigger:{ trigger:'#pd', start:'top 88%' } });
