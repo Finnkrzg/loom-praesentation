@@ -808,7 +808,7 @@
     <span class="bg-gl cover-bg-gl" aria-hidden="true">L</span>
 
     <aside class="cover-qr" aria-label="Präsentation am Handy mitverfolgen">
-      <div class="cover-qr-code" aria-hidden="true" style="width: 96px; height: 96px; padding: 5px; background: #EAE3D4; border-radius: 4px;">
+      <div class="cover-qr-code" aria-hidden="true" style="width: 110px; height: 110px; padding: 5px; background: #EAE3D4; border-radius: 4px;">
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://loom-praesentation.vercel.app&color=080807&bgcolor=EAE3D4" alt="QR Code" style="width: 100%; height: 100%; display: block;">
       </div>
       <div class="cover-qr-text">
@@ -1735,6 +1735,11 @@
           anticipatePin: 1,     // 💥 DAS IST DER FIX: Bereitet das Rastern vor, killt den Jitter
           scrub: true,          // Bei Lenis Smooth-Scroll IMMER 'true' statt Zahlen, um Konflikte zu vermeiden
           invalidateOnRefresh: true,
+          snap: {
+            snapTo: 1 / (document.querySelectorAll('.comp-card').length - 1),
+            duration: { min: 0.2, max: 0.6 },
+            ease: 'power2.inOut'
+          },
           onUpdate: self => $('#loom-karte').classList.toggle('illuminated', self.progress > .60)
         }
       });
@@ -1745,11 +1750,8 @@
     gsap.from('.halo-lead', { opacity:0, y:30, duration:1, ease:'power2.out', scrollTrigger:{ trigger:'.halo-lead', start:'top 86%' } });
     gsap.from('.hstep', { x:-50, opacity:0, duration:1, stagger:.18, ease:'power2.out', scrollTrigger:{ trigger:'.halo-steps', start:'top 84%' } });
 
-    /* PREIS — Pin + Parallax (desktop only; anticipatePin gegen Lenis-Jitter) */
-    if (!isMobile()) {
-      ScrollTrigger.create({ trigger:'#preis', start:'top top', end:'+=30%', pin:true, pinSpacing:true, anticipatePin: 1 });
-      gsap.to('#preis-bg', { y:-80, ease:'none', scrollTrigger:{ trigger:'#preis', start:'top top', end:'+=30%', scrub:true } });
-    }
+    /* PREIS — natürliches Scrollen, nur Parallax-BG (kein Pin) */
+    gsap.to('#preis-bg', { y:-80, ease:'none', scrollTrigger:{ trigger:'#preis', start:'top bottom', end:'bottom top', scrub:true } });
     gsap.from('.pl', { yPercent:115, duration:1.6, stagger:.22, ease:'power3.out', scrollTrigger:{ trigger:'#preis', start:'top 80%' } });
     gsap.from('#pd', { opacity:0, x:-30, duration:1.1, ease:'power2.out', scrollTrigger:{ trigger:'#pd', start:'top 88%' } });
     gsap.from('.ppt', { opacity:0, y:24, duration:.9, stagger:.14, ease:'power2.out', scrollTrigger:{ trigger:'#pp', start:'top 90%' } });
