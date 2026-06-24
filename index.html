@@ -1616,6 +1616,91 @@
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => ScrollTrigger.refresh(), 200); });
   document.fonts.ready.then(() => ScrollTrigger.refresh());
   window.addEventListener('load', () => { ScrollTrigger.refresh(); });
+
+  /* ════════════════════════════════════════════════════════════
+     PRESENTATION MODE — Swipe-Navigation (Touch-Board)
+     Horizontal + vertical swipes glide section-to-section via Lenis.
+  ════════════════════════════════════════════════════════════ */
+  (function presentationMode() {
+    // Ordered flow of major sections. #konkurrenz-outer counts as one stop;
+    // its internal horizontal pinning stays fully intact because we only
+    // scroll to native section offsets and let ScrollTrigger drive the pin.
+    const SECTION_IDS = [
+      '#cover', '#problem', '#tension', '#gesicht', '#markt',
+      '#brand-break', '#farben', '#zielgruppe', '#konkurrenz-outer',
+      '#halo', '#preis', '#journey', '#content-strat', '#mindset', '#closing',
+    ];
+
+    const sections = SECTION_IDS
+      .map(id => document.querySelector(id))
+      .filter(Boolean);
+    if (sections.length < 2) return;
+
+    const SWIPE_THRESHOLD = 50;   // min px before a swipe registers
+    const FLIGHT_MS       = 1500; // glide duration; matches Lenis duration
+    let isAnimating = false;      // debounce lock during a flight
+    let startX = 0, startY = 0;
+
+    // Find the section whose top edge sits closest to the viewport top (0px).
+    function getCurrentSectionIndex() {
+      let closest = 0;
+      let minDist = Infinity;
+      for (let i = 0; i < sections.length; i++) {
+        const dist = Math.abs(sections[i].getBoundingClientRect().top);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      }
+      return closest;
+    }
+
+    function goToSection(index) {
+      if (index < 0 || index >= sections.length) return;
+      isAnimating = true;
+      const target = sections[index];
+
+      if (lenis) {
+        lenis.scrollTo(target, { duration: FLIGHT_MS / 1000, lock: true });
+      } else {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      setTimeout(() => { isAnimating = false; }, FLIGHT_MS);
+    }
+
+    function navigate(direction) {
+      if (isAnimating) return;
+      const current = getCurrentSectionIndex();
+      goToSection(current + direction);
+    }
+
+    window.addEventListener('touchstart', e => {
+      if (!e.changedTouches || !e.changedTouches.length) return;
+      startX = e.changedTouches[0].clientX;
+      startY = e.changedTouches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener('touchend', e => {
+      if (isAnimating || !e.changedTouches || !e.changedTouches.length) return;
+
+      const deltaX = e.changedTouches[0].clientX - startX;
+      const deltaY = e.changedTouches[0].clientY - startY;
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      // Ignore taps / micro-movements below the threshold.
+      if (absX < SWIPE_THRESHOLD && absY < SWIPE_THRESHOLD) return;
+
+      // Pick the dominant axis, then map to next/prev.
+      // Swipe LEFT or UP → Next; swipe RIGHT or DOWN → Previous.
+      let direction;
+      if (absX > absY) {
+        direction = deltaX < 0 ? 1 : -1;
+      } else {
+        direction = deltaY < 0 ? 1 : -1;
+      }
+
+      navigate(direction);
+    }, { passive: true });
+  })();
   </script>
 </body>
 </html>
