@@ -719,6 +719,10 @@
     @media (max-width: 768px) {
       :root { --pad-h: 24px; --pad-v: 84px; }
       body { cursor: auto; }
+      body::before {
+        box-shadow: none !important;
+        display: none !important; /* Completely remove the dark vignette on mobile */
+      }
       .cursor-dot, .cursor-ring, .cursor-label { display: none; }
       .cover-qr { display: none; }
       .sidebar { display: none; }
@@ -738,6 +742,7 @@
       .comp-card { width: 100%; }
       .scroll-cue { left: var(--pad-h); }
       .closing-credit { right: var(--pad-h); }
+      #clt { font-size: clamp(56px, 17vw, 88px); letter-spacing: .06em !important; text-indent: 0 !important; }
       .target-img { height: 260px; }
       .halo-image { max-width: 100%; }
       .pcard-body { padding: 30px 26px 38px; }
@@ -1062,7 +1067,7 @@
             </ul>
           </div>
           <div class="pcard-img" style="border-radius: 4px; border: 1px solid var(--stone);">
-             <img src="./images/loom-interior-mediteran-essen.png" alt="LOOM Konfigurator Preview" loading="lazy" decoding="async">
+             <img src=".images/loom-warmes-zimmer-banner.png" alt="LOOM Konfigurator Preview" loading="lazy" decoding="async">
           </div>
         </div>
       </div>
