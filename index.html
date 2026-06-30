@@ -187,18 +187,18 @@
       justify-content: center; gap: 22px; z-index: 500;
     }
     .sidebar-brand {
-      position: absolute; top: 38px; user-select: none;
-      display: flex; align-items: center; justify-content: center;
+      position: absolute; top: 34px; left: 50%;
+      transform: translateX(-50%);
+      user-select: none; width: 52px;
     }
-    /* Transparent-PNG logo — gold strokes sit natively on the dark theme.
-       Gentle filter keeps it crisp without altering the brand hue. */
+    /* Transparent-PNG logo — gold strokes sit natively on the dark theme. */
     .loom-logo {
       display: block; height: auto; object-fit: contain;
       filter: brightness(1.05) contrast(1.04);
       -webkit-user-select: none; user-select: none; pointer-events: none;
     }
     .sidebar-brand .loom-logo {
-      max-width: 52px; transform: rotate(-90deg); transform-origin: center;
+      max-height: 26px; width: 100%; transform: none;
     }
     .dot {
       width: 6px; height: 6px; border-radius: 50%;
@@ -637,11 +637,6 @@
     img.manifesto-kicker {
       display: block; max-width: 120px; height: auto; margin-bottom: 24px;
     }
-    /* Cover logo — top-left, mirrors the QR widget padding on the right */
-    .cover-logo {
-      position: absolute; top: 48px; left: var(--pad-h); z-index: 5;
-      max-width: 80px;
-    }
     .manifesto-headline {
       font-family: var(--font-display); font-weight: 600;
       font-size: clamp(38px, 4vw, 54px); line-height: 1.1;
@@ -735,7 +730,6 @@
       }
       .cursor-dot, .cursor-ring, .cursor-label { display: none; }
       .cover-qr { display: none; }
-      .cover-logo { display: none; }
       .sidebar { display: none; }
       .mobile-nav { display: flex; }
       #cover { padding-top: 80px; }
@@ -829,8 +823,6 @@
     <div class="bg-image" id="cover-bg" aria-hidden="true"></div>
     <div class="bg-overlay" aria-hidden="true"></div>
     <span class="bg-gl cover-bg-gl" aria-hidden="true">L</span>
-
-    <img class="loom-logo cover-logo" src="./images/Logo-loom-stepper.png" alt="LOOM">
 
     <aside class="cover-qr" aria-label="Präsentation am Handy mitverfolgen">
       <div class="cover-qr-code" aria-hidden="true" style="width: 160px; height: 160px; padding: 7px; background: #EAE3D4; border-radius: 4px;">
@@ -1749,15 +1741,14 @@
       const padH = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pad-h')) || 84;
       const dist = () => kTrack.scrollWidth - window.innerWidth + (padH() * 2);
 
-      // Snap to each card's exact horizontal position (handles variable card widths)
+      // Snap to each card's exact position (offsetLeft relative to track)
       const getSnapPoints = () => {
         const cards = gsap.utils.toArray('.comp-card');
         const maxScroll = dist();
         if (maxScroll <= 0) return [0, 1];
         return cards.map((card, i) => {
           if (i === cards.length - 1) return 1;
-          const offset = card.offsetLeft - padH();
-          return Math.min(1, Math.max(0, offset / maxScroll));
+          return gsap.utils.clamp(0, 1, card.offsetLeft / maxScroll);
         });
       };
 
@@ -1776,18 +1767,19 @@
         x: () => -dist(), 
         ease: 'none',
         scrollTrigger: {
-          trigger: kOuter,      // Trigger ist jetzt der Outer-Wrapper
+          trigger: kOuter,
           start: 'top top',
-          end: () => `+=${dist() + 200}`, // Exakte Breite + 200px Puffer für sanften Auslauf
-          pin: true,            // WICHTIG: Wir pinnen den Trigger selbst, nicht das Child!
-          anticipatePin: 1,     // 💥 DAS IST DER FIX: Bereitet das Rastern vor, killt den Jitter
-          scrub: true,          // Bei Lenis Smooth-Scroll IMMER 'true' statt Zahlen, um Konflikte zu vermeiden
+          end: () => `+=${dist() + 200}`,
+          pin: true,
+          anticipatePin: 1,
+          scrub: true,
           invalidateOnRefresh: true,
           snap: {
             snapTo: snapToCard,
-            duration: { min: 0.25, max: 0.55 },
-            ease: 'power2.inOut',
-            delay: 0.05
+            duration: { min: 0.4, max: 0.85 },
+            ease: 'power3.inOut',
+            delay: 0.08,
+            inertia: false
           },
           onUpdate: self => $('#loom-karte').classList.toggle('illuminated', self.progress > .60)
         }
