@@ -187,9 +187,18 @@
       justify-content: center; gap: 22px; z-index: 500;
     }
     .sidebar-brand {
-      writing-mode: vertical-lr; transform: rotate(180deg);
-      font-size: 10px; letter-spacing: .24em; text-transform: uppercase;
-      color: var(--muted); position: absolute; top: 38px; user-select: none;
+      position: absolute; top: 38px; user-select: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    /* Transparent-PNG logo — gold strokes sit natively on the dark theme.
+       Gentle filter keeps it crisp without altering the brand hue. */
+    .loom-logo {
+      display: block; height: auto; object-fit: contain;
+      filter: brightness(1.05) contrast(1.04);
+      -webkit-user-select: none; user-select: none; pointer-events: none;
+    }
+    .sidebar-brand .loom-logo {
+      max-width: 40px; transform: rotate(-90deg); transform-origin: center;
     }
     .dot {
       width: 6px; height: 6px; border-radius: 50%;
@@ -216,7 +225,7 @@
       align-items: center; justify-content: space-between; padding: 0 24px;
       border-bottom: 1px solid rgba(56,52,46,.4);
     }
-    .mobile-nav-brand { font-family: var(--font-display); font-size: 15px; font-weight: 700; letter-spacing: .26em; text-indent:.26em; color: var(--cream); }
+    img.mobile-nav-brand { max-height: 20px; width: auto; max-width: 90px; }
     .mobile-chapter   { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
     .mobile-bar { display: none; }
 
@@ -624,13 +633,13 @@
     }
     .cinematic-intro { position: relative; height: 100%; }
     .cinematic-intro .sticky-wrapper { position: sticky; top: 25vh; }
-    .manifesto-kicker {
-      display: inline-flex; align-items: center; gap: 14px;
-      font-size: 14px; letter-spacing: .2em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 26px;
+    img.manifesto-kicker {
+      display: block; max-width: 120px; height: auto; margin-bottom: 24px;
     }
-    .manifesto-kicker::before {
-      content: ''; width: 32px; height: 1px; background: var(--accent-dark);
+    /* Cover logo — top-left, mirrors the QR widget padding on the right */
+    .cover-logo {
+      position: absolute; top: 48px; left: var(--pad-h); z-index: 5;
+      max-width: 80px;
     }
     .manifesto-headline {
       font-family: var(--font-display); font-weight: 600;
@@ -725,6 +734,7 @@
       }
       .cursor-dot, .cursor-ring, .cursor-label { display: none; }
       .cover-qr { display: none; }
+      .cover-logo { display: none; }
       .sidebar { display: none; }
       .mobile-nav { display: flex; }
       #cover { padding-top: 80px; }
@@ -800,7 +810,7 @@
   </div>
 
   <nav class="sidebar" aria-label="Kapitel">
-    <span class="sidebar-brand">LOOM</span>
+    <span class="sidebar-brand"><img class="loom-logo" src="./images/Logo-loom-stepper.png" alt="LOOM"></span>
     <button class="dot active" data-target="cover"        data-label="Intro"></button>
     <button class="dot"        data-target="gesicht"      data-label="Persona"></button>
     <button class="dot"        data-target="markt"        data-label="Produkte"></button>
@@ -809,7 +819,7 @@
   </nav>
 
   <div class="mobile-nav">
-    <span class="mobile-nav-brand">LOOM</span>
+    <img class="loom-logo mobile-nav-brand" src="./images/Logo-loom-stepper.png" alt="LOOM">
     <span class="mobile-chapter" id="mob-ch">Intro</span>
   </div>
   <div class="mobile-bar" id="mob-bar"></div>
@@ -818,6 +828,8 @@
     <div class="bg-image" id="cover-bg" aria-hidden="true"></div>
     <div class="bg-overlay" aria-hidden="true"></div>
     <span class="bg-gl cover-bg-gl" aria-hidden="true">L</span>
+
+    <img class="loom-logo cover-logo" src="./images/Logo-loom-stepper.png" alt="LOOM">
 
     <aside class="cover-qr" aria-label="Präsentation am Handy mitverfolgen">
       <div class="cover-qr-code" aria-hidden="true" style="width: 160px; height: 160px; padding: 7px; background: #EAE3D4; border-radius: 4px;">
@@ -954,7 +966,7 @@
     <div class="cinematic-grid">
         <div class="cinematic-intro">
             <div class="sticky-wrapper">
-                <span class="manifesto-kicker">Das Manifest</span>
+                <img class="loom-logo manifesto-kicker" src="./images/Logo-loom-stepper.png" alt="LOOM — Das Manifest">
                 <h2 class="manifesto-headline">Wir weben den Rhythmus der Verlangsamung.</h2>
                 <div class="manifesto-accent"></div>
                 <p class="manifesto-summary">
