@@ -61,7 +61,6 @@
       font-weight: 300;
       overflow-x: clip;
       max-width: 100vw;
-      touch-action: pan-y;
       cursor: none;
     }
 
@@ -723,7 +722,7 @@
     }
     @media (max-width: 768px) {
       :root { --pad-h: 24px; --pad-v: 84px; }
-      body { cursor: auto; }
+      body { cursor: auto; touch-action: pan-y; }
       body::before {
         box-shadow: none !important;
         display: none !important; /* Completely remove the dark vignette on mobile */
@@ -1344,19 +1343,28 @@
   const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isFine    = window.matchMedia('(pointer: fine)').matches;
 
-  /* ────────── LENIS SMOOTH SCROLL (angepasst für "Schwere") ────────── */
+  /* ────────── LENIS SMOOTH SCROLL ────────── */
   let lenis = null;
+
   if (!isReduced && typeof Lenis !== 'undefined') {
     lenis = new Lenis({
-      lerp: 0.15, /* snappier — weniger Nachlauf für direkteres Scrollen */
-      wheelMultiplier: 1.8,   /* schnelleres Scrollen mit dem Mausrad */
+      lerp: 0.15,
+      wheelMultiplier: 1.8,
       smoothWheel: true,
-      smoothTouch: true,      /* Touch-Board: Lenis fängt Swipes selbst ab */
-      touchMultiplier: 3.5,   /* deutlich responsiveres Drag-Gefühl am Touch-Board */
+      // Touch-Board: natives Wischen statt Lenis-Intercept (smoothTouch blockiert oft Windows-Touch)
+      smoothTouch: false,
+      syncTouch: true,
+      syncTouchLerp: 0.1,
+      touchMultiplier: 3.5,
     });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(t => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
+
+    // Sicherheitsnetz: Lenis nach erstem Touch garantiert aktiv
+    window.addEventListener('touchstart', () => {
+      if (lenis && lenis.isStopped) lenis.start();
+    }, { once: true, passive: true });
   }
   const scrollTo = el => {
     if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.3 });
@@ -1394,7 +1402,7 @@
           loader.style.display = 'none';
           gsap.set(curtain, { transformOrigin: 'top' });
           gsap.to(curtain, { scaleY: 0, duration: .9, ease: 'power3.inOut',
-            onComplete: () => { curtain.style.display = 'none'; if (lenis) lenis.start(); ScrollTrigger.refresh(); }
+            onComplete: () => { curtain.style.display = 'none'; if (lenis) { lenis.start(); lenis.resize(); } ScrollTrigger.refresh(); }
           });
           startReveal();
         }
@@ -1407,6 +1415,11 @@
       .to('#loader-brand', { opacity: 1, duration: .8, ease: 'power2.out' }, .5)
       .to('#loader-sub',   { opacity: 1, duration: .8, ease: 'power2.out' }, .7)
       .to({}, { duration: .25 });
+
+    // Fallback: Lenis nach max. 5s garantiert freigeben
+    setTimeout(() => {
+      if (lenis && lenis.isStopped) { lenis.start(); lenis.resize(); ScrollTrigger.refresh(); }
+    }, 5000);
   })();
 
   /* ────────── THREE.JS — driftende Wollfasern ────────── */
@@ -1819,7 +1832,10 @@
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => ScrollTrigger.refresh(), 200); });
   document.fonts.ready.then(() => ScrollTrigger.refresh());
-  window.addEventListener('load', () => { ScrollTrigger.refresh(); });
+  window.addEventListener('load', () => {
+    if (lenis) { lenis.start(); lenis.resize(); }
+    ScrollTrigger.refresh();
+  });
   </script>
 </body>
 </html>
