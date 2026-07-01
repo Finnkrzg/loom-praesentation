@@ -54,6 +54,17 @@
     html.lenis, html.lenis body { height: auto; }
     .lenis.lenis-smooth { scroll-behavior: auto !important; }
 
+    /* Smartboard / Touch: natives Scrollen, kein Text-Markieren beim Wischen */
+    html.touch-board { touch-action: pan-y; overscroll-behavior-y: none; }
+    html.touch-board,
+    html.touch-board body {
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      cursor: auto;
+    }
+    html.touch-board img { -webkit-user-drag: none; user-select: none; }
+
     body {
       background: var(--black);
       color: var(--light);
@@ -1343,28 +1354,29 @@
   const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isFine    = window.matchMedia('(pointer: fine)').matches;
 
-  /* ────────── LENIS SMOOTH SCROLL ────────── */
+  /* ────────── SCROLL — Lenis (Desktop) / Native (Smartboard & Touch) ────────── */
   let lenis = null;
+  const useNativeScroll = 'ontouchstart' in window
+    || navigator.maxTouchPoints > 0
+    || window.matchMedia('(pointer: coarse)').matches;
 
-  if (!isReduced && typeof Lenis !== 'undefined') {
+  if (useNativeScroll) {
+    document.documentElement.classList.add('touch-board');
+    window.addEventListener('scroll', () => ScrollTrigger.update(), { passive: true });
+    // Verhindert Text-Markierung beim Wischen auf Windows-Smartboards
+    document.addEventListener('selectstart', e => e.preventDefault());
+  } else if (!isReduced && typeof Lenis !== 'undefined') {
     lenis = new Lenis({
       lerp: 0.15,
       wheelMultiplier: 1.8,
       smoothWheel: true,
-      // Touch-Board: natives Wischen statt Lenis-Intercept (smoothTouch blockiert oft Windows-Touch)
       smoothTouch: false,
-      syncTouch: true,
-      syncTouchLerp: 0.1,
-      touchMultiplier: 3.5,
     });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(t => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
-
-    // Sicherheitsnetz: Lenis nach erstem Touch garantiert aktiv
-    window.addEventListener('touchstart', () => {
-      if (lenis && lenis.isStopped) lenis.start();
-    }, { once: true, passive: true });
+  } else {
+    window.addEventListener('scroll', () => ScrollTrigger.update(), { passive: true });
   }
   const scrollTo = el => {
     if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.3 });
