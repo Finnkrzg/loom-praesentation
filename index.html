@@ -49,28 +49,29 @@
       --ease-io:   cubic-bezier(.76,0,.24,1);
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    /* Präsentation: Textauswahl global aus → kein "Markieren" beim Touch-Wischen.
-       touch-action: pan-y erlaubt vertikales Scrollen per Finger (auch wenn das
-       Smartboard die Geste als Maus/Pointer meldet). */
-    html, body {
+    *, *::before, *::after {
+      box-sizing: border-box; margin: 0; padding: 0;
+      /* Präsentation: Textauswahl komplett aus → kein "Markieren" beim Wischen */
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
+      -webkit-user-drag: none;
+    }
+
+    html, body {
       touch-action: pan-y;
       overscroll-behavior-x: none;
     }
-    img { -webkit-user-drag: none; }
 
     html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; max-width: 100vw; overflow-x: clip; }
     html.lenis, html.lenis body { height: auto; }
     .lenis.lenis-smooth { scroll-behavior: auto !important; }
 
-    /* Smartboard / Touch-Erkennung: nativer Cursor statt Custom-Dot */
-    html.touch-board { overscroll-behavior-y: none; }
+    /* Smartboard: Browser-Gesten AUS, wir scrollen manuell per Pointer.
+       nativer Cursor statt Custom-Dot. */
+    html.touch-board, html.touch-board body { touch-action: none; overscroll-behavior: none; }
     html.touch-board body { cursor: auto; }
 
     body {
@@ -1379,30 +1380,54 @@
     document.documentElement.classList.add('touch-board');
     window.addEventListener('scroll', () => ScrollTrigger.update(), { passive: true });
 
-    /* Garantierter Drag-to-Scroll für Boards, die den Finger als Maus/Pen melden.
-       Echte Touch-Events (pointerType 'touch') scrollt der Browser bereits nativ,
-       daher nur für 'mouse'/'pen' aktiv, um Doppel-Scroll zu vermeiden. */
-    let dragging = false, lastY = 0;
+    /* Vollständig manuelle Scroll-Steuerung — funktioniert unabhängig davon, ob das
+       Smartboard den Finger als touch, pen oder mouse meldet. touch-action:none (CSS)
+       schaltet native Gesten ab, wir übernehmen komplett. Mit Schwung (Momentum). */
     const noDrag = el => el && el.closest('a, button, input, textarea, select, .dot');
+    let dragging = false, lastY = 0, lastT = 0, velocity = 0, momentumId = null;
 
-    window.addEventListener('pointerdown', e => {
-      if (e.pointerType === 'touch') return;
-      if (noDrag(e.target)) return;
-      dragging = true;
-      lastY = e.clientY;
-    }, { passive: true });
+    const stopMomentum = () => { if (momentumId) cancelAnimationFrame(momentumId); momentumId = null; };
 
-    window.addEventListener('pointermove', e => {
+    const onDown = (y, target) => {
+      if (noDrag(target)) return;
+      stopMomentum();
+      dragging = true; lastY = y; lastT = performance.now(); velocity = 0;
+    };
+    const onMove = y => {
       if (!dragging) return;
-      const dy = e.clientY - lastY;
-      lastY = e.clientY;
+      const now = performance.now();
+      const dy = y - lastY;
+      const dt = now - lastT || 16;
+      velocity = dy / dt;               // px pro ms
+      lastY = y; lastT = now;
       window.scrollBy(0, -dy);
-    }, { passive: true });
+    };
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      let v = velocity * 16;            // auf ~1 Frame skalieren
+      const glide = () => {
+        v *= 0.94;                      // Reibung
+        if (Math.abs(v) < 0.4) { momentumId = null; return; }
+        window.scrollBy(0, -v);
+        momentumId = requestAnimationFrame(glide);
+      };
+      if (Math.abs(v) > 1) momentumId = requestAnimationFrame(glide);
+    };
 
-    const endDrag = () => { dragging = false; };
-    window.addEventListener('pointerup', endDrag, { passive: true });
-    window.addEventListener('pointercancel', endDrag, { passive: true });
-    window.addEventListener('pointerleave', endDrag, { passive: true });
+    if (window.PointerEvent) {
+      // Pointer Events (Maus / Pen / Touch vereinheitlicht) — verhindert Doppel-Scroll
+      window.addEventListener('pointerdown', e => onDown(e.clientY, e.target), { passive: false });
+      window.addEventListener('pointermove', e => { if (dragging) { e.preventDefault(); onMove(e.clientY); } }, { passive: false });
+      window.addEventListener('pointerup', onUp, { passive: true });
+      window.addEventListener('pointercancel', onUp, { passive: true });
+      window.addEventListener('pointerleave', onUp, { passive: true });
+    } else {
+      // Touch-Fallback für Boards ohne Pointer-Events
+      window.addEventListener('touchstart', e => { if (e.touches[0]) onDown(e.touches[0].clientY, e.target); }, { passive: false });
+      window.addEventListener('touchmove', e => { if (dragging && e.touches[0]) { e.preventDefault(); onMove(e.touches[0].clientY); } }, { passive: false });
+      window.addEventListener('touchend', onUp, { passive: true });
+    }
 
   } else if (!isReduced && typeof Lenis !== 'undefined') {
     lenis = new Lenis({
