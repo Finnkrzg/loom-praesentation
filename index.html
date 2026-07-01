@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>LOOM — Österreichische Schurwolle · Quiet Luxury</title>
   <meta name="description" content="LOOM — handgewebte Teppiche aus 100% österreichischer Schurwolle. Eco-Luxury für den Conscious Aesthete.">
 
@@ -44,6 +44,8 @@
       --pad-v: 140px;
       --pad-h: 84px;
       --max-w: 1240px;
+      --vh: 100vh;
+      --vh: 100dvh;
 
       --ease-out:  cubic-bezier(.22,1,.36,1);
       --ease-io:   cubic-bezier(.76,0,.24,1);
@@ -63,14 +65,23 @@
     html, body {
       touch-action: pan-y;
       overscroll-behavior-x: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; max-width: 100vw; overflow-x: clip; }
     html.lenis, html.lenis body { height: auto; }
     .lenis.lenis-smooth { scroll-behavior: auto !important; }
 
-    /* Smartboard: Browser-Gesten AUS, wir scrollen manuell per Pointer.
-       nativer Cursor statt Custom-Dot. */
+    /* Mobile/Tablet: natives Touch-Scroll, keine Custom-Gesten */
+    html.touch-mobile { overflow-x: clip; }
+    html.touch-mobile body {
+      cursor: auto;
+      touch-action: pan-y;
+      overscroll-behavior-y: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Smartboard (großes Touch-Display): manuelles Drag-Scroll */
     html.touch-board, html.touch-board body { touch-action: none; overscroll-behavior: none; }
     html.touch-board body { cursor: auto; }
 
@@ -246,7 +257,14 @@
     }
     img.mobile-nav-brand { max-height: 20px; width: auto; max-width: 90px; }
     .mobile-chapter   { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
-    .mobile-bar { display: none; }
+    .mobile-bar {
+      display: none; position: fixed; top: 50px; left: 0; right: 0; height: 2px;
+      z-index: 501; background: rgba(56,52,46,.35); pointer-events: none;
+    }
+    .mobile-bar::after {
+      content: ''; position: absolute; inset: 0; background: var(--accent);
+      transform: scaleX(var(--mob-progress, 0)); transform-origin: left;
+    }
 
     /* ═══════════════════════════════════════════════════════════
        SECTION BASE + TYPE
@@ -300,7 +318,7 @@
     /* ═══════════════════════════════════════════════════════════
        01 COVER
     ═══════════════════════════════════════════════════════════ */
-    #cover { background: transparent; height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; }
+    #cover { background: transparent; min-height: var(--vh); height: var(--vh); display: flex; align-items: center; position: relative; overflow: hidden; }
     .cover-bg-gl { font-size: 58vw; color: #100F0D; bottom: -.12em; right: -.06em; }
     .cover-qr {
       position: absolute; top: 38px; right: var(--pad-h); z-index: 5;
@@ -741,18 +759,39 @@
       #konkurrenz-pin { padding-bottom: 0; }
     }
     @media (max-width: 768px) {
-      :root { --pad-h: 24px; --pad-v: 84px; }
+      :root {
+        --pad-h: 24px;
+        --pad-v: 72px;
+        --text-xl: clamp(44px, 11.5vw, 72px);
+        --text-l: clamp(32px, 8vw, 48px);
+        --text-m: clamp(26px, 6.5vw, 38px);
+      }
       body { cursor: auto; touch-action: pan-y; }
       body::before {
         box-shadow: none !important;
-        display: none !important; /* Completely remove the dark vignette on mobile */
+        display: none !important;
       }
+      .body { font-size: 17px; line-height: 1.65; }
+      .lbl { font-size: 11px; letter-spacing: .16em; }
+      .stat { font-size: clamp(52px, 14vw, 88px); }
       .cursor-dot, .cursor-ring, .cursor-label { display: none; }
       .cover-qr { display: none; }
       .sidebar { display: none; }
       .mobile-nav { display: flex; }
-      #cover { padding-top: 80px; }
-      .cover-bg-gl { font-size: 90vw; }
+      .mobile-bar { display: block; }
+      .thread { display: none; }
+      #cover { padding-top: 62px; min-height: var(--vh); height: auto; }
+      .cover-bg-gl { font-size: 72vw; opacity: .35; }
+      .cover-sub { max-width: 28ch; }
+      #problem, #tension, #mindset { min-height: auto; padding-top: calc(var(--pad-v) + 12px); padding-bottom: var(--pad-v); }
+      #brand-break { height: auto; min-height: 72vh; padding-bottom: var(--pad-v); }
+      #closing { height: auto; min-height: var(--vh); padding: var(--pad-v) var(--pad-h); }
+      .closing-credit { position: relative; bottom: auto; right: auto; margin-top: 48px; text-align: right; }
+      .glass-card { padding: 28px 22px 32px; }
+      .glass-card p { font-size: 15px; }
+      .manifesto-headline { font-size: clamp(28px, 7vw, 38px); }
+      .manifesto-summary { font-size: 16px; }
+      .vision-cta { cursor: pointer; }
       .zg-cards { grid-template-columns: 1fr; }
       .pcards { grid-template-columns: 1fr; }
       .cgrid { grid-template-columns: 1fr; }
@@ -765,24 +804,52 @@
       #konkurrenz-track { flex-direction: column; width: 100%; gap: 2px; }
       .comp-card { width: 100%; }
       .scroll-cue { left: var(--pad-h); }
-      .closing-credit { right: var(--pad-h); }
       .closing-logo { max-width: min(220px, 72vw); }
       .target-img { height: 260px; }
       .halo-image { max-width: 100%; }
       .pcard-body { padding: 30px 26px 38px; }
-      .marquee span { font-size: 26px; padding: 0 26px; }
+      .marquee span { font-size: 22px; padding: 0 20px; }
+      .marquee { overflow: hidden; }
+      .mindset-bg-gl { font-size: 48vw; }
+      .bb-num { font-size: clamp(64px, 18vw, 120px); }
+      .loom-cinematic-manifesto { padding-bottom: 12px; }
+      .cinematic-grid { padding-top: calc(var(--pad-v) + 8px); }
+      .halo-image { clip-path: none !important; max-width: 100%; }
+      #preis { min-height: auto; padding: var(--pad-v) var(--pad-h); }
+      .sec { overflow-x: clip; }
       .loader-count { bottom: 28px; right: 28px; }
-      .ges-sticky { position: relative; height: auto; padding: 60px 0 20px; }
-      .ges-intro { position: relative; top: 0; margin-bottom: 44px; }
-      .monolith { width: 100%; max-width: 480px; height: 56vh; margin: 0 auto; clip-path: none; }
-      .monolith img { transform: none; }
+      #gesicht { overflow: visible; }
+      .ges-sticky { position: relative; height: auto; padding: 48px 0 8px; overflow: visible; }
+      .ges-intro { position: relative; top: 0; margin-bottom: 32px; padding: 0 var(--pad-h); }
+      .ges-title { font-size: clamp(22px, 6vw, 32px); max-width: 100%; }
+      .monolith {
+        width: min(420px, calc(100vw - var(--pad-h) * 2)); max-width: 420px;
+        height: min(52dvh, 420px); margin: 0 auto;
+        clip-path: none !important; transform: none !important;
+      }
+      .monolith img { transform: none !important; }
+      .monolith-sheen { display: none; }
       .ges-chapters { padding: 0 var(--pad-h); }
       .ges-spacer-top, .ges-spacer-bot { display: none; }
-      .ges-step { min-height: auto; margin-bottom: 28px; justify-content: center; }
-      .ges-box { opacity: 1; max-width: 100%; padding: 40px 28px; }
+      .ges-step { min-height: auto; margin-bottom: 20px; justify-content: center; }
+      .ges-step.left, .ges-step.right { justify-content: center; }
+      .ges-box {
+        opacity: 1 !important; transform: none !important;
+        max-width: 100%; padding: 32px 22px 36px;
+        backdrop-filter: none; -webkit-backdrop-filter: none;
+        background: rgba(14,13,11,.88);
+      }
       .swatch-grid { grid-template-columns: 1fr 1fr; }
       .swatch-chip { height: 150px; }
       .farben-note { grid-template-columns: 1fr; gap: 32px; }
+    }
+    @media (max-width: 1024px) and (min-width: 769px) {
+      :root { --pad-h: 40px; --pad-v: 96px; }
+      .sidebar { display: none; }
+      .mobile-nav { display: flex; }
+      .mobile-bar { display: block; }
+      .thread { display: none; }
+      #cover { padding-top: 62px; }
     }
     @media (max-width: 480px) {
       :root { --pad-h: 20px; --pad-v: 68px; }
@@ -1356,6 +1423,7 @@
   <script>
   'use strict';
   gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ ignoreMobileResize: true });
 
   const $  = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
@@ -1363,26 +1431,34 @@
   const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isFine    = window.matchMedia('(pointer: fine)').matches;
 
-  /* ────────── SCROLL — Lenis (Desktop-Maus) / Native (Smartboard & Touch) ────────── */
+  /* ────────── SCROLL — drei Modi ──────────
+     1) Mobile/Tablet  → natives Touch-Scroll (pan-y)
+     2) Smartboard       → manuelles Drag-Scroll (touch-board)
+     3) Desktop-Maus     → Lenis
+  ────────── */
   let lenis = null;
-  // Breite Erkennung: 'any-pointer: coarse' erwischt auch Smartboards,
-  // deren Primär-Pointer sich als Maus meldet.
-  const useNativeScroll = 'ontouchstart' in window
-    || navigator.maxTouchPoints > 0
-    || window.matchMedia('(pointer: coarse)').matches
-    || window.matchMedia('(any-pointer: coarse)').matches;
 
-  // Text-Markierung IMMER unterbinden (Präsentation, kein Text-Select nötig).
+  const isCoarsePrimary = window.matchMedia('(pointer: coarse)').matches;
+
+  const useMobileNative = () => window.innerWidth < 1024;
+  const useSmartboardScroll = () => !useMobileNative()
+    && (isCoarsePrimary || window.matchMedia('(any-pointer: coarse)').matches);
+
   document.addEventListener('selectstart', e => e.preventDefault());
   document.addEventListener('dragstart', e => e.preventDefault());
 
-  if (useNativeScroll) {
-    document.documentElement.classList.add('touch-board');
+  const bindNativeScroll = () => {
     window.addEventListener('scroll', () => ScrollTrigger.update(), { passive: true });
+  };
 
-    /* Vollständig manuelle Scroll-Steuerung — funktioniert unabhängig davon, ob das
-       Smartboard den Finger als touch, pen oder mouse meldet. touch-action:none (CSS)
-       schaltet native Gesten ab, wir übernehmen komplett. Mit Schwung (Momentum). */
+  if (useMobileNative()) {
+    document.documentElement.classList.add('touch-mobile');
+    bindNativeScroll();
+
+  } else if (useSmartboardScroll()) {
+    document.documentElement.classList.add('touch-board');
+    bindNativeScroll();
+
     const noDrag = el => el && el.closest('a, button, input, textarea, select, .dot');
     let dragging = false, lastY = 0, lastT = 0, velocity = 0, momentumId = null;
 
@@ -1398,16 +1474,16 @@
       const now = performance.now();
       const dy = y - lastY;
       const dt = now - lastT || 16;
-      velocity = dy / dt;               // px pro ms
+      velocity = dy / dt;
       lastY = y; lastT = now;
       window.scrollBy(0, -dy);
     };
     const onUp = () => {
       if (!dragging) return;
       dragging = false;
-      let v = velocity * 16;            // auf ~1 Frame skalieren
+      let v = velocity * 16;
       const glide = () => {
-        v *= 0.94;                      // Reibung
+        v *= 0.94;
         if (Math.abs(v) < 0.4) { momentumId = null; return; }
         window.scrollBy(0, -v);
         momentumId = requestAnimationFrame(glide);
@@ -1416,14 +1492,12 @@
     };
 
     if (window.PointerEvent) {
-      // Pointer Events (Maus / Pen / Touch vereinheitlicht) — verhindert Doppel-Scroll
       window.addEventListener('pointerdown', e => onDown(e.clientY, e.target), { passive: false });
       window.addEventListener('pointermove', e => { if (dragging) { e.preventDefault(); onMove(e.clientY); } }, { passive: false });
       window.addEventListener('pointerup', onUp, { passive: true });
       window.addEventListener('pointercancel', onUp, { passive: true });
       window.addEventListener('pointerleave', onUp, { passive: true });
     } else {
-      // Touch-Fallback für Boards ohne Pointer-Events
       window.addEventListener('touchstart', e => { if (e.touches[0]) onDown(e.touches[0].clientY, e.target); }, { passive: false });
       window.addEventListener('touchmove', e => { if (dragging && e.touches[0]) { e.preventDefault(); onMove(e.touches[0].clientY); } }, { passive: false });
       window.addEventListener('touchend', onUp, { passive: true });
@@ -1440,12 +1514,23 @@
     gsap.ticker.add(t => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
   } else {
-    window.addEventListener('scroll', () => ScrollTrigger.update(), { passive: true });
+    bindNativeScroll();
   }
   const scrollTo = el => {
     if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.3 });
     else el.scrollIntoView({ behavior: 'smooth' });
   };
+
+  /* Fortschrittsbalken unter Mobile-Nav (≤1024px) */
+  if (window.innerWidth < 1024) {
+    ScrollTrigger.create({
+      trigger: 'body', start: 'top top', end: 'bottom bottom',
+      onUpdate: self => {
+        const bar = $('#mob-bar');
+        if (bar) bar.style.setProperty('--mob-progress', self.progress);
+      },
+    });
+  }
 
   /* ────────── PRELOADER ────────── */
   (function preloader() {
@@ -1765,29 +1850,35 @@
       mqTrack.style.transform = `translate3d(${mqX}px,0,0)`;
     });
 
-    /* DAS GESICHT — Portrait-Reveal, Scale-Parallax, Sheen, Karten */
-    gsap.to('#monolith', { clipPath:'inset(0 0 0% 0)', duration:1.5, ease:'power3.inOut',
-      scrollTrigger:{ trigger:'#gesicht', start:'top 60%', once:true } });
+    /* DAS GESICHT — Desktop: cinematic scrub; Mobile: einfache Reveals */
+    if (!isMobile()) {
+      gsap.to('#monolith', { clipPath:'inset(0 0 0% 0)', duration:1.5, ease:'power3.inOut',
+        scrollTrigger:{ trigger:'#gesicht', start:'top 60%', once:true } });
 
-    gsap.to('#monolith img', { scale:1, ease:'none',
-      scrollTrigger:{ trigger:'#gesicht', start:'top top', end:'bottom bottom', scrub:true } });
-    gsap.fromTo('#monolith', { y:40 }, { y:-40, ease:'none',
-      scrollTrigger:{ trigger:'#gesicht', start:'top top', end:'bottom bottom', scrub:true } });
+      gsap.to('#monolith img', { scale:1, ease:'none',
+        scrollTrigger:{ trigger:'#gesicht', start:'top top', end:'bottom bottom', scrub:true } });
+      gsap.fromTo('#monolith', { y:40 }, { y:-40, ease:'none',
+        scrollTrigger:{ trigger:'#gesicht', start:'top top', end:'bottom bottom', scrub:true } });
 
-    gsap.fromTo('#monolith-sheen', { xPercent:-120 }, { xPercent:120, ease:'none',
-      scrollTrigger:{ trigger:'#gesicht', start:'top top', end:'bottom bottom', scrub:1.2 } });
+      gsap.fromTo('#monolith-sheen', { xPercent:-120 }, { xPercent:120, ease:'none',
+        scrollTrigger:{ trigger:'#gesicht', start:'top top', end:'bottom bottom', scrub:1.2 } });
+    } else {
+      gsap.set('#monolith', { clipPath: 'inset(0 0 0 0)', clearProps: 'transform' });
+      gsap.from('#monolith', { opacity: 0, y: 24, duration: 1, ease: 'power2.out',
+        scrollTrigger:{ trigger:'#monolith', start:'top 88%', once:true } });
+    }
 
     $$('#gesicht .ges-step').forEach(step => {
       const box = step.querySelector('[data-ges]');
       const fromX = step.classList.contains('right') ? 60 : -60;
       gsap.fromTo(box,
-        { opacity:0, y:50, x:fromX },
+        { opacity: isMobile() ? 1 : 0, y: isMobile() ? 28 : 50, x: isMobile() ? 0 : fromX },
         { opacity:1, y:0, x:0, duration:1.1, ease:'power3.out',
           scrollTrigger:{
             trigger:step,
-            start:'top 72%',
-            toggleActions:'play none none reverse',
-            fastScrollEnd:true,   /* schnelles Vorbeiscrollen → sofort Endzustand */
+            start: isMobile() ? 'top 92%' : 'top 72%',
+            toggleActions: isMobile() ? 'play none none none' : 'play none none reverse',
+            fastScrollEnd: !isMobile(),
           } });
     });
     gsap.from('.ges-intro > *', { opacity:0, y:24, duration:1, stagger:.14, ease:'power2.out',
@@ -1875,8 +1966,12 @@
       });
     }
 
-    /* HALO */
-    gsap.to('.halo-image', { clipPath:'inset(0 0% 0 0)', duration:1.5, ease:'power3.inOut', scrollTrigger:{ trigger:'.halo-image', start:'top 82%', once:true } });
+    /* HALO — clip reveal nur Desktop */
+    if (!isMobile()) {
+      gsap.to('.halo-image', { clipPath:'inset(0 0% 0 0)', duration:1.5, ease:'power3.inOut', scrollTrigger:{ trigger:'.halo-image', start:'top 82%', once:true } });
+    } else {
+      gsap.set('.halo-image', { clipPath: 'inset(0 0 0 0)' });
+    }
     gsap.from('.halo-lead', { opacity:0, y:30, duration:1, ease:'power2.out', scrollTrigger:{ trigger:'.halo-lead', start:'top 86%' } });
     gsap.from('.hstep', { x:-50, opacity:0, duration:1, stagger:.18, ease:'power2.out', scrollTrigger:{ trigger:'.halo-steps', start:'top 84%' } });
 
@@ -1907,6 +2002,7 @@
   /* ────────── RESIZE / FONTS / LOAD ────────── */
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => ScrollTrigger.refresh(), 200); });
+  window.addEventListener('orientationchange', () => { setTimeout(() => ScrollTrigger.refresh(), 350); });
   document.fonts.ready.then(() => ScrollTrigger.refresh());
   window.addEventListener('load', () => {
     if (lenis) { lenis.start(); lenis.resize(); }
