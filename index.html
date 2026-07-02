@@ -267,6 +267,41 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
+       MODE SWITCH — Vortrag ⇄ Details
+    ═══════════════════════════════════════════════════════════ */
+    .mode-switch {
+      position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 600;
+      display: inline-flex; align-items: center; gap: 2px;
+      padding: 4px; border-radius: 999px;
+      background: rgba(15,14,13,.72);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.09);
+      box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    }
+    .ms-btn {
+      appearance: none; -webkit-appearance: none; border: none; background: transparent;
+      color: var(--silver); cursor: none;
+      font-family: var(--font-body); font-weight: 400;
+      font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+      padding: 7px 15px; border-radius: 999px; white-space: nowrap;
+      transition: color .3s, background .3s;
+    }
+    .ms-btn.active { background: var(--accent); color: var(--black); }
+    .ms-btn:not(.active):hover { color: var(--cream); }
+
+    /* Talk/Detail Sichtbarkeit — voller Text bleibt immer im DOM erhalten */
+    .talk-only { display: none; }
+    body.mode-talk .talk-only { display: block; }
+    body.mode-talk .detail-only { display: none; }
+
+    /* Stichwort-Listen für den Vortragsmodus */
+    .kb-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
+    .kb-list li { position: relative; padding-left: 24px; font-size: 19px; line-height: 1.45; color: var(--silver); }
+    .kb-list li::before { content: ''; position: absolute; left: 0; top: .62em; width: 11px; height: 1px; background: var(--accent); }
+    .kb-list li strong { color: var(--light); font-weight: 500; }
+    .kb-lead { color: var(--light); }
+
+    /* ═══════════════════════════════════════════════════════════
        SECTION BASE + TYPE
     ═══════════════════════════════════════════════════════════ */
     .sec { position: relative; z-index: 1; padding: var(--pad-v) var(--pad-h); overflow: hidden; }
@@ -895,6 +930,10 @@
       .vision-cta { cursor: pointer; }
       .term, .shop-cta { cursor: pointer; }
       .glossary-card { padding: 38px 26px 40px; }
+      /* Umschalter: unten rechts schweben lassen, damit die Top-Nav frei bleibt */
+      .mode-switch { top: auto; bottom: 16px; right: 12px; left: auto; transform: none; padding: 4px; }
+      .ms-btn { cursor: pointer; padding: 9px 15px; font-size: 11px; }
+      .kb-list li { font-size: 17px; }
       /* Online-Shop ist nicht mobil optimiert → Button nur am Desktop zeigen */
       .shop-cta { display: none !important; }
       .closing-contact {
@@ -983,7 +1022,12 @@
     }
   </style>
 </head>
-<body>
+<body class="mode-talk">
+
+  <div class="mode-switch" id="mode-switch" role="group" aria-label="Ansichtsmodus umschalten">
+    <button type="button" class="ms-btn" data-mode="talk">Vortrag</button>
+    <button type="button" class="ms-btn" data-mode="detail">Details</button>
+  </div>
 
   <div id="loader">
     <svg class="loader-weave" viewBox="0 0 340 56" preserveAspectRatio="none" aria-hidden="true">
@@ -1062,12 +1106,18 @@
           <div>
             <div class="rule" style="margin-bottom:34px;"></div>
             <h2 class="d-m c-cream" style="margin-bottom:22px;">Das stille Problem.</h2>
-            <p class="body c-light" style="max-width:540px;">
+            <p class="body c-light detail-only" style="max-width:540px;">
               Synthetische Heimtextilien landen nach wenigen Jahren auf der Deponie.
               Billige Fasern aus Übersee, Massenware ohne Herkunft.
               Die Zielgruppe spürt den Widerspruch — und kauft trotzdem dasselbe.
               Nicht aus Überzeugung. Aus Mangel an einer Alternative, die schön <em>und</em> ehrlich ist.
             </p>
+            <ul class="kb-list talk-only" style="max-width:540px;">
+              <li>Synthetik → nach Jahren auf der Deponie</li>
+              <li>Billige Massenware, keine Herkunft</li>
+              <li>Zielgruppe spürt den Widerspruch — kauft trotzdem</li>
+              <li>Es fehlt die Alternative: schön <strong>und</strong> ehrlich</li>
+            </ul>
           </div>
           <div class="quote-bl">
             <p class="qt">„Zwischen Anspruch und Einkaufswagen klafft die größte Lücke im Premium-Interior."</p>
@@ -1119,7 +1169,13 @@
         <div class="ges-box" data-ges>
           <span class="chapter-tag">01 / Der Bruch</span>
           <h3>Die Seele des Raumes.</h3>
-          <p>Moderne Architektur ist ein visuelles Meisterwerk — Stahl, Glas, Sichtbeton. Doch als ich vor Jahren in einer perfekten, leeren Villa stand, spürte ich nur Kälte. Jeder Schritt hallte hart zurück. Keine Akustik, keine Haptik, keine Seele. LOOM entstand aus dem Bedürfnis, der unterkühlten Moderne einen Gegenpol zu setzen: ein Fundament aus roher Natur, das uns erdet.</p>
+          <p class="detail-only">Moderne Architektur ist ein visuelles Meisterwerk — Stahl, Glas, Sichtbeton. Doch als ich vor Jahren in einer perfekten, leeren Villa stand, spürte ich nur Kälte. Jeder Schritt hallte hart zurück. Keine Akustik, keine Haptik, keine Seele. LOOM entstand aus dem Bedürfnis, der unterkühlten Moderne einen Gegenpol zu setzen: ein Fundament aus roher Natur, das uns erdet.</p>
+          <ul class="kb-list talk-only">
+            <li>Moderne Architektur: Stahl, Glas — aber kalt</li>
+            <li>Leere Villa: harter Hall, keine Seele</li>
+            <li>LOOM = Gegenpol zur unterkühlten Moderne</li>
+            <li>Fundament aus roher Natur, das erdet</li>
+          </ul>
         </div>
       </div>
 
@@ -1127,7 +1183,13 @@
         <div class="ges-box" data-ges>
           <span class="chapter-tag">02 / Die Identität</span>
           <h3>Für die, die mit den Händen sehen.</h3>
-          <p>Wir entwerfen nicht für den flüchtigen Konsum. LOOM ist für Menschen, die nicht erklären müssen, warum sie anders sind. Für Ästheten, die mit den Fingerspitzen über eine Oberfläche fahren, bevor sie entscheiden. Für jene, die in einer immer lauteren, digitaleren Welt nach etwas Echtem, Schwerem und Unverfälschtem suchen.</p>
+          <p class="detail-only">Wir entwerfen nicht für den flüchtigen Konsum. LOOM ist für Menschen, die nicht erklären müssen, warum sie anders sind. Für Ästheten, die mit den Fingerspitzen über eine Oberfläche fahren, bevor sie entscheiden. Für jene, die in einer immer lauteren, digitaleren Welt nach etwas Echtem, Schwerem und Unverfälschtem suchen.</p>
+          <ul class="kb-list talk-only">
+            <li>Nicht für flüchtigen Konsum</li>
+            <li>Für Menschen, die mit den Händen sehen</li>
+            <li>Ästheten & Puristen</li>
+            <li>Suche nach Echtem, Schwerem, Unverfälschtem</li>
+          </ul>
         </div>
       </div>
 
@@ -1135,10 +1197,15 @@
         <div class="ges-box" data-ges>
           <span class="chapter-tag">03 / Die Haltung</span>
           <h3>Keine Kompromisse.</h3>
-          <ul class="ges-list">
+          <ul class="ges-list detail-only">
             <li><strong>Radikale Schwere:</strong> Keine flüchtigen Stoffe. Mit 4.500&nbsp;g pro m² weben wir Substanz, die den Raum physisch ankert.</li>
             <li><strong>Akustische Architektur:</strong> Wir verkaufen keine Teppiche, sondern Frequenzen — die den Hall schlucken und Stille erschaffen.</li>
             <li><strong>Alpiner Purismus:</strong> 100&nbsp;% naturbelassene Schurwolle mit echtem Lanolin. Keine globale Lieferkette, kein Plastik, keine Ausreden.</li>
+          </ul>
+          <ul class="kb-list talk-only">
+            <li><strong>Radikale Schwere</strong> — 4.500 g/m², ankert den Raum</li>
+            <li><strong>Akustische Architektur</strong> — schluckt Hall, schafft Stille</li>
+            <li><strong>Alpiner Purismus</strong> — 100 % Schurwolle, kein Plastik</li>
           </ul>
         </div>
       </div>
@@ -1147,7 +1214,13 @@
         <div class="ges-box" data-ges>
           <span class="chapter-tag">04 / Das Erbe</span>
           <h3>Die Rückkehr der Verlangsamung.</h3>
-          <p>Wir wollen Räume nicht nur einrichten — wir wollen sie heilen. Unsere Vision ist ein Vermächtnis des Handwerks, das schnelle Trends und Generationen überdauert. Ein LOOM-Produkt verlässt man nicht. Man vererbt es.</p>
+          <p class="detail-only">Wir wollen Räume nicht nur einrichten — wir wollen sie heilen. Unsere Vision ist ein Vermächtnis des Handwerks, das schnelle Trends und Generationen überdauert. Ein LOOM-Produkt verlässt man nicht. Man vererbt es.</p>
+          <ul class="kb-list talk-only">
+            <li>Räume nicht einrichten — heilen</li>
+            <li>Vermächtnis des Handwerks</li>
+            <li>Überdauert Trends & Generationen</li>
+            <li>Man verlässt es nicht — man vererbt es</li>
+          </ul>
           <a href="https://shf6dsifatyv.c01-15.plentymarkets.com/de/stories/stille-als-statement/" class="vision-cta" target="_blank" rel="noopener">Betrete das Fundament <span class="arrow">→</span></a>
         </div>
       </div>
@@ -1164,41 +1237,52 @@
                 <img class="loom-logo manifesto-kicker" src="./images/opt/Logo-loom-stepper.png" alt="LOOM — Das Manifest" loading="lazy">
                 <h2 class="manifesto-headline">Wir weben den Rhythmus der Verlangsamung.</h2>
                 <div class="manifesto-accent"></div>
-                <p class="manifesto-summary">
+                <p class="manifesto-summary detail-only">
                     Loom schafft architektonische Ankerpunkte für Menschen, die bewusst konsumieren und das Rohe suchen. Wir verbinden alpines Traditionshandwerk, kompromisslose Nachhaltigkeit und zeitlosen Minimalismus. Unser Versprechen: Naturprodukte, die Räumen eine Seele geben und jeden Tag spürbaren Luxus bieten.
                 </p>
+                <ul class="kb-list talk-only">
+                    <li>Architektonische Ankerpunkte für bewussten Konsum</li>
+                    <li>Alpines Handwerk + Nachhaltigkeit + Minimalismus</li>
+                    <li>Naturprodukte, die Räumen eine Seele geben</li>
+                </ul>
             </div>
         </div>
         <div class="cinematic-cards">
             <div class="glass-card reveal-up">
                 <span class="card-number">01</span>
                 <h3>Was machen wir?</h3>
-                <p>Wir kreieren stilvolle, haptische Meisterwerke aus 100% naturbelassener Schafschurwolle – von traditionell nass gewalkten Patschen bis hin zu massiven, raumprägenden Teppichen.</p>
+                <p class="detail-only">Wir kreieren stilvolle, haptische Meisterwerke aus 100% naturbelassener Schafschurwolle – von traditionell nass gewalkten Patschen bis hin zu massiven, raumprägenden Teppichen.</p>
+                <p class="talk-only kb-lead">Haptische Meisterwerke aus 100 % Schurwolle — von Patschen bis Teppich.</p>
             </div>
             <div class="glass-card reveal-up" style="animation-delay: 0.1s;">
                 <span class="card-number">02</span>
                 <h3>Für wen?</h3>
-                <p>Für Ästheten und Liebhaber von echtem Handwerk, die keine massenproduzierten Kompromisse eingehen, sondern zeitloses Design, bewussten Konsum und authentische Materialien schätzen.</p>
+                <p class="detail-only">Für Ästheten und Liebhaber von echtem Handwerk, die keine massenproduzierten Kompromisse eingehen, sondern zeitloses Design, bewussten Konsum und authentische Materialien schätzen.</p>
+                <p class="talk-only kb-lead">Ästheten & Handwerks-Liebhaber. Kein Massen-Kompromiss.</p>
             </div>
             <div class="glass-card reveal-up" style="animation-delay: 0.2s;">
                 <span class="card-number">03</span>
                 <h3>Welchen Nutzen schaffen wir?</h3>
-                <p>Wir verleihen kühler Architektur eine warme Seele und akustische Ruhe, während wir ein unvergleichliches Barfuß-Gefühl für den täglichen Rückzugsort schaffen.</p>
+                <p class="detail-only">Wir verleihen kühler Architektur eine warme Seele und akustische Ruhe, während wir ein unvergleichliches Barfuß-Gefühl für den täglichen Rückzugsort schaffen.</p>
+                <p class="talk-only kb-lead">Warme Seele + akustische Ruhe. Barfuß-Gefühl für den Rückzugsort.</p>
             </div>
             <div class="glass-card reveal-up" style="animation-delay: 0.1s;">
                 <span class="card-number">04</span>
                 <h3>Wofür stehen wir?</h3>
-                <p>Für radikale Regionalität, österreichisches Handwerk, kompromisslose Qualität und tief verwurzelte Nachhaltigkeit – organisch, plastikfrei und ehrlich.</p>
+                <p class="detail-only">Für radikale Regionalität, österreichisches Handwerk, kompromisslose Qualität und tief verwurzelte Nachhaltigkeit – organisch, plastikfrei und ehrlich.</p>
+                <p class="talk-only kb-lead">Regionalität, österreichisches Handwerk, plastikfrei, ehrlich.</p>
             </div>
             <div class="glass-card reveal-up" style="animation-delay: 0.2s;">
                 <span class="card-number">05</span>
                 <h3>Wahrnehmung</h3>
-                <p>Als Premium-Marke, bei der alpines Erbe auf High-End-Design trifft. Vertrauenswürdig, authentisch, stilvoll und mit einem kompromisslosen Gespür für Details.</p>
+                <p class="detail-only">Als Premium-Marke, bei der alpines Erbe auf High-End-Design trifft. Vertrauenswürdig, authentisch, stilvoll und mit einem kompromisslosen Gespür für Details.</p>
+                <p class="talk-only kb-lead">Premium: alpines Erbe trifft High-End-Design.</p>
             </div>
             <div class="glass-card reveal-up" style="animation-delay: 0.3s;">
                 <span class="card-number">06</span>
                 <h3>Das Versprechen</h3>
-                <p>Textilien, die halten, was sie haptisch versprechen. Spürbare Qualität, absolute Transparenz in der Herkunft und zeitlose Designs, die niemals aus der Mode kommen.</p>
+                <p class="detail-only">Textilien, die halten, was sie haptisch versprechen. Spürbare Qualität, absolute Transparenz in der Herkunft und zeitlose Designs, die niemals aus der Mode kommen.</p>
+                <p class="talk-only kb-lead">Spürbare Qualität, Herkunfts-Transparenz, zeitloses Design.</p>
             </div>
         </div>
     </div>
@@ -1267,10 +1351,15 @@
           <div>
             <div class="ptag" style="border-color:var(--accent-dark); color:var(--accent-dark);">UX & Psychologie</div>
             <h3 class="d-m c-cream pname">Der Sonderwunsch.</h3>
-            <p class="body c-silver" style="margin-bottom: 24px;">Luxus bedeutet kompromisslose Individualität. In unserem Shop konfigurieren Kunden ihre Wunschfarbe und das exakte Wunschmaß — und sehen sofort den kalkulierten Live-Preis.</p>
-            <ul class="pspecs">
+            <p class="body c-silver detail-only" style="margin-bottom: 24px;">Luxus bedeutet kompromisslose Individualität. In unserem Shop konfigurieren Kunden ihre Wunschfarbe und das exakte Wunschmaß — und sehen sofort den kalkulierten Live-Preis.</p>
+            <p class="body c-silver talk-only" style="margin-bottom: 24px;">Kunden konfigurieren Farbe & Maß — mit sofortigem Live-Preis.</p>
+            <ul class="pspecs detail-only">
               <li><strong>Frictionless Luxury:</strong> Keine Wartezeit auf Angebote. Der Preis ist sofort transparent.</li>
               <li><strong>Der IKEA-Effekt:</strong> Wer sein Produkt selbst konfiguriert, baut emotionalen Besitz auf. Der finale Preis rückt psychologisch in den Hintergrund, weil das Endresultat ein "Co-Creation"-Unikat ist.</li>
+            </ul>
+            <ul class="kb-list talk-only" style="margin-top:4px;">
+              <li><strong>Frictionless Luxury</strong> — Preis sofort transparent</li>
+              <li><strong>IKEA-Effekt</strong> — Selbst konfiguriert = emotionaler Besitz</li>
             </ul>
           </div>
           <div class="pcard-img" style="border-radius: 4px; border: 1px solid var(--stone);">
@@ -1459,9 +1548,9 @@
         <em>Man beginnt mit dem, was man sich leisten kann — und endet mit dem, was man begehrt.</em>
       </p>
       <div class="halo-steps">
-        <div class="hstep"><span class="hstep-num">01</span><div><p class="lbl c-accent" style="margin-bottom:14px;">Das Hero-Product</p><p class="hstep-body">Der Teppich ist das Halo-Objekt. Er erzeugt Begehren, definiert die Marke, setzt den Qualitätsstandard. <strong>Er muss nicht von jedem gekauft, aber von jedem begehrt werden.</strong></p></div></div>
-        <div class="hstep"><span class="hstep-num">02</span><div><p class="lbl c-accent" style="margin-bottom:14px;">Die Strahlkraft</p><p class="hstep-body">Die Walkpatschen für €60 sind die Einführung in die LOOM-Welt. <strong>Erstberührung, Vertrauen, Haptik-Erlebnis</strong> — in einem Paket, bei 20× niedrigerem Einsatz.</p></div></div>
-        <div class="hstep"><span class="hstep-num">03</span><div><p class="lbl c-accent" style="margin-bottom:14px;">Die Monetarisierung</p><p class="hstep-body">Patschen → E-Mail-Liste → Teppich. Der Funnel ist simpel, die Marge auf dem Teppich ist stark. <strong>Customer Lifetime Value</strong> entsteht durch Vertrauen, nicht durch Rabatte.</p></div></div>
+        <div class="hstep"><span class="hstep-num">01</span><div><p class="lbl c-accent" style="margin-bottom:14px;">Das Hero-Product</p><p class="hstep-body detail-only">Der Teppich ist das Halo-Objekt. Er erzeugt Begehren, definiert die Marke, setzt den Qualitätsstandard. <strong>Er muss nicht von jedem gekauft, aber von jedem begehrt werden.</strong></p><p class="hstep-body talk-only">Teppich = Halo-Objekt. <strong>Von jedem begehrt, nicht von jedem gekauft.</strong></p></div></div>
+        <div class="hstep"><span class="hstep-num">02</span><div><p class="lbl c-accent" style="margin-bottom:14px;">Die Strahlkraft</p><p class="hstep-body detail-only">Die Walkpatschen für €60 sind die Einführung in die LOOM-Welt. <strong>Erstberührung, Vertrauen, Haptik-Erlebnis</strong> — in einem Paket, bei 20× niedrigerem Einsatz.</p><p class="hstep-body talk-only">Patschen €60 = Einstieg. <strong>Erstberührung bei 20× kleinerem Einsatz.</strong></p></div></div>
+        <div class="hstep"><span class="hstep-num">03</span><div><p class="lbl c-accent" style="margin-bottom:14px;">Die Monetarisierung</p><p class="hstep-body detail-only">Patschen → E-Mail-Liste → Teppich. Der Funnel ist simpel, die Marge auf dem Teppich ist stark. <strong>Customer Lifetime Value</strong> entsteht durch Vertrauen, nicht durch Rabatte.</p><p class="hstep-body talk-only">Patschen → E-Mail → Teppich. <strong>CLV durch Vertrauen, nicht Rabatt.</strong></p></div></div>
       </div>
     </div>
   </section>
@@ -2237,6 +2326,31 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && modal.classList.contains('open')) close();
     });
+  })();
+
+  /* ────────── MODE SWITCH — Vortrag ⇄ Details ────────── */
+  (function modeSwitch(){
+    const sw = document.getElementById('mode-switch');
+    if (!sw) return;
+    const KEY = 'loom-view-mode';
+    const btns = sw.querySelectorAll('.ms-btn');
+
+    const apply = (mode, persist) => {
+      const talk = mode !== 'detail';
+      document.body.classList.toggle('mode-talk', talk);
+      document.body.classList.toggle('mode-detail', !talk);
+      btns.forEach(b => b.classList.toggle('active', b.dataset.mode === (talk ? 'talk' : 'detail')));
+      if (persist) { try { localStorage.setItem(KEY, talk ? 'talk' : 'detail'); } catch (e) {} }
+      // Layout ändert sich (Text ein-/ausgeblendet) → Scroll-Animationen neu vermessen
+      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+      if (lenis) lenis.resize();
+    };
+
+    let saved = 'talk';
+    try { saved = localStorage.getItem(KEY) || 'talk'; } catch (e) {}
+    apply(saved, false);
+
+    btns.forEach(b => b.addEventListener('click', () => apply(b.dataset.mode, true)));
   })();
 
   /* ────────── RESIZE / FONTS / LOAD ────────── */
