@@ -875,8 +875,19 @@
       .cover-sub { max-width: 28ch; }
       #problem, #tension, #mindset { min-height: auto; padding-top: calc(var(--pad-v) + 12px); padding-bottom: var(--pad-v); }
       #brand-break { height: auto; min-height: 72vh; padding-bottom: var(--pad-v); }
-      #closing { height: auto; min-height: var(--vh); padding: var(--pad-v) var(--pad-h); }
-      .closing-credit { position: relative; bottom: auto; right: auto; margin-top: 48px; text-align: right; }
+      #closing {
+        height: auto; min-height: var(--vh);
+        padding: var(--pad-v) var(--pad-h);
+        flex-direction: column; align-items: flex-start; justify-content: center;
+      }
+      #closing .inner { padding: 0 !important; width: 100%; }
+      .closing-logo { margin-bottom: 8px; }
+      .closing-credit {
+        position: relative; bottom: auto; right: auto;
+        margin-top: 44px; text-align: left; width: 100%;
+      }
+      /* riesiges "L"-Glyph im Hintergrund auf Mobile zähmen, damit es den Inhalt nicht überlagert */
+      .closing-bg-gl { font-size: 90vw; bottom: -.06em; right: -.12em; opacity: .5; }
       .glass-card { padding: 28px 22px 32px; }
       .glass-card p { font-size: 15px; }
       .manifesto-headline { font-size: clamp(28px, 7vw, 38px); }
