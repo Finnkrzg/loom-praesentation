@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="./images/Hauptbanner-1920-1080.jpg" fetchpriority="high">
+  <link rel="preload" as="image" href="./images/opt/Hauptbanner-1920-1080.jpg" fetchpriority="high">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -628,17 +628,17 @@
     .bg-image { position: absolute; inset: 0; background-size: cover; background-position: center; will-change: transform; }
     .bg-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
 
-    #cover .bg-image { background-image: url('./images/Hauptbanner-1920-1080.jpg'); background-position: center 40%; z-index: 1; }
+    #cover .bg-image { background-image: url('./images/opt/Hauptbanner-1920-1080.jpg'); background-position: center 40%; z-index: 1; }
     #cover .bg-overlay { background: linear-gradient(to bottom, rgba(8,8,7,.5) 0%, rgba(8,8,7,.72) 60%, rgba(8,8,7,.97) 100%); }
     #cover .cover-bg-gl { z-index: 3; }
     #cover .inner { z-index: 4; position: relative; }
 
-    #tension .bg-image { background-image: url('./images/loom-interior-mediteran-ofen.png'); background-position: center 30%; filter: brightness(.24) saturate(.6); z-index: 1; }
+    #tension .bg-image { background-image: url('./images/opt/loom-interior-mediteran-ofen.jpg'); background-position: center 30%; filter: brightness(.24) saturate(.6); z-index: 1; }
     #tension .inner { z-index: 2; position: relative; }
 
-    #preis .bg-image { background-image: url('./images/loom-interior-mediteran-nacht.png'); background-position: center; filter: brightness(.12) saturate(.4); z-index: 1; }
+    #preis .bg-image { background-image: url('./images/opt/loom-interior-mediteran-nacht.jpg'); background-position: center; filter: brightness(.12) saturate(.4); z-index: 1; }
 
-    #closing .bg-image { background-image: url('./images/loom-interior-mediteran.png'); background-position: center; filter: brightness(.15) saturate(.5); transform: scale(1.08); z-index: 1; }
+    #closing .bg-image { background-image: url('./images/opt/loom-interior-mediteran.jpg'); background-position: center; filter: brightness(.15) saturate(.5); transform: scale(1.08); z-index: 1; }
     #closing .bg-gl, #closing .inner { z-index: 2; position: relative; }
 
     /* ═══════════════════════════════════════════════════════════
@@ -650,7 +650,7 @@
       background-color: var(--black);
       background-image:
         linear-gradient(rgba(8,8,7,.72), rgba(8,8,7,.82)),
-        url('https://cdn02.plentymarkets.com/shf6dsifatyv/frontend/hf_20260609_130017_2a7d55ca-061d-49e4-8c8a-03b01ab158bd__1_.png');
+        url('./images/opt/loom-interior-mediteran-nacht.jpg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -744,6 +744,88 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
+       GLOSSAR — klickbare Fachwörter + Popup
+    ═══════════════════════════════════════════════════════════ */
+    .term {
+      font: inherit; color: var(--accent); background: none;
+      border: none; padding: 0 .04em; margin: 0; cursor: none;
+      border-bottom: 1px dashed rgba(196,168,130,.45);
+      transition: color .3s, border-color .3s, background .3s;
+      -webkit-user-select: none; user-select: none;
+      white-space: normal;
+    }
+    .term:hover { color: var(--accent-bright); border-bottom-color: var(--accent-bright); }
+    .term::after {
+      content: 'i'; display: inline-flex; align-items: center; justify-content: center;
+      width: .92em; height: .92em; margin-left: .28em; vertical-align: .32em;
+      font-family: var(--font-body); font-style: italic; font-size: .5em; font-weight: 500;
+      line-height: 1; color: var(--black); background: var(--accent);
+      border-radius: 50%; transition: background .3s;
+    }
+    .term:hover::after { background: var(--accent-bright); }
+
+    .glossary-modal {
+      position: fixed; inset: 0; z-index: 10500;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+      opacity: 0; visibility: hidden;
+      transition: opacity .4s var(--ease-out), visibility .4s;
+    }
+    .glossary-modal.open { opacity: 1; visibility: visible; }
+    .glossary-backdrop {
+      position: absolute; inset: 0; background: rgba(6,6,5,.74);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    .glossary-card {
+      position: relative; z-index: 2; width: min(520px, 100%);
+      background: rgba(15,14,13,.94);
+      border: 1px solid rgba(255,255,255,.07); border-top: 2px solid var(--accent);
+      box-shadow: 0 50px 120px rgba(0,0,0,.7);
+      padding: 46px 42px 48px;
+      transform: translateY(20px) scale(.98); opacity: 0;
+      transition: transform .5s var(--ease-out), opacity .5s var(--ease-out);
+    }
+    .glossary-modal.open .glossary-card { transform: none; opacity: 1; }
+    .glossary-eyebrow { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); }
+    .glossary-title { font-family: var(--font-display); font-size: clamp(28px,4vw,40px); font-weight: 600; color: var(--cream); margin: 14px 0 0; line-height: 1.1; }
+    .glossary-accent { width: 48px; height: 2px; background: var(--accent); margin: 22px 0; }
+    .glossary-def { font-size: 17px; line-height: 1.74; color: var(--silver); }
+    .glossary-close {
+      position: absolute; top: 16px; right: 18px;
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.12);
+      color: var(--silver); font-size: 20px; line-height: 1; cursor: pointer;
+      display: grid; place-items: center;
+      transition: color .3s, border-color .3s, background .3s;
+    }
+    .glossary-close:hover { color: var(--accent); border-color: var(--accent); background: rgba(196,168,130,.08); }
+
+    /* ═══════════════════════════════════════════════════════════
+       KONTAKT / SHOP — Closing
+    ═══════════════════════════════════════════════════════════ */
+    .closing-contact {
+      margin-top: 40px; display: flex; flex-wrap: wrap; align-items: center;
+      gap: 14px 30px;
+    }
+    .contact-item {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 14px; letter-spacing: .02em; color: var(--light);
+      text-decoration: none; transition: color .3s;
+    }
+    .contact-item .ci-ico { color: var(--accent); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+    a.contact-item:hover { color: var(--accent); }
+    .shop-cta {
+      display: inline-flex; align-items: center; gap: 12px; margin-top: 40px;
+      padding: 15px 30px; background: var(--accent); color: var(--black);
+      font-size: 12px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase;
+      text-decoration: none; border: 1px solid var(--accent);
+      transition: background .35s var(--ease-out), color .35s, transform .35s var(--ease-out);
+      cursor: none;
+    }
+    .shop-cta .arrow { transition: transform .35s var(--ease-out); }
+    .shop-cta:hover { background: transparent; color: var(--accent); transform: translateY(-3px); }
+    .shop-cta:hover .arrow { transform: translateX(6px); }
+
+    /* ═══════════════════════════════════════════════════════════
        RESPONSIVE
     ═══════════════════════════════════════════════════════════ */
     @media (max-width: 1024px) {
@@ -771,6 +853,11 @@
         box-shadow: none !important;
         display: none !important;
       }
+      /* Grain-Overlay (mix-blend-mode) ist auf Mobile ein teurer Repaint → aus */
+      body::after { display: none !important; }
+      /* Parallax-BGs auf Mobile statisch halten → weniger Scroll-Ruckler */
+      .bg-image { will-change: auto; }
+      .pcard-img img, .market-img-wrap img, .target-img img { will-change: auto; }
       .body { font-size: 17px; line-height: 1.65; }
       .lbl { font-size: 11px; letter-spacing: .16em; }
       .stat { font-size: clamp(52px, 14vw, 88px); }
@@ -792,6 +879,9 @@
       .manifesto-headline { font-size: clamp(28px, 7vw, 38px); }
       .manifesto-summary { font-size: 16px; }
       .vision-cta { cursor: pointer; }
+      .term, .shop-cta { cursor: pointer; }
+      .glossary-card { padding: 38px 26px 40px; }
+      .closing-contact { gap: 12px 22px; }
       .zg-cards { grid-template-columns: 1fr; }
       .pcards { grid-template-columns: 1fr; }
       .cgrid { grid-template-columns: 1fr; }
@@ -891,7 +981,7 @@
   </div>
 
   <nav class="sidebar" aria-label="Kapitel">
-    <span class="sidebar-brand"><img class="loom-logo" src="./images/Logo-loom-stepper.png" alt="LOOM"></span>
+    <span class="sidebar-brand"><img class="loom-logo" src="./images/opt/Logo-loom-stepper.png" alt="LOOM" width="52" height="26"></span>
     <button class="dot active" data-target="cover"        data-label="Intro"></button>
     <button class="dot"        data-target="gesicht"      data-label="Persona"></button>
     <button class="dot"        data-target="markt"        data-label="Produkte"></button>
@@ -900,7 +990,7 @@
   </nav>
 
   <div class="mobile-nav">
-    <img class="loom-logo mobile-nav-brand" src="./images/Logo-loom-stepper.png" alt="LOOM">
+    <img class="loom-logo mobile-nav-brand" src="./images/opt/Logo-loom-stepper.png" alt="LOOM">
     <span class="mobile-chapter" id="mob-ch">Intro</span>
   </div>
   <div class="mobile-bar" id="mob-bar"></div>
@@ -989,7 +1079,7 @@
         <h2 class="ges-title">Wahrer Luxus schreit nicht.<br>Er <em>dämpft</em> den Lärm der Welt.</h2>
       </div>
       <figure class="monolith" id="monolith">
-        <img src="https://cdn02.plentymarkets.com/shf6dsifatyv/frontend/Clemens-Walcher-10.png" alt="Clemens Walcher — Creative Director von LOOM" fetchpriority="high" loading="eager" decoding="async">
+        <img src="./images/opt/Clemens-Walcher-10.jpg" alt="Clemens Walcher — Creative Director von LOOM" fetchpriority="high" loading="eager" decoding="async">
         <div class="monolith-sheen" id="monolith-sheen"></div>
         <div class="monolith-grad"></div>
         <figcaption class="monolith-name">Clemens Walcher<span>Creative Director</span></figcaption>
@@ -1045,7 +1135,7 @@
     <div class="cinematic-grid">
         <div class="cinematic-intro">
             <div class="sticky-wrapper">
-                <img class="loom-logo manifesto-kicker" src="./images/Logo-loom-stepper.png" alt="LOOM — Das Manifest">
+                <img class="loom-logo manifesto-kicker" src="./images/opt/Logo-loom-stepper.png" alt="LOOM — Das Manifest" loading="lazy">
                 <h2 class="manifesto-headline">Wir weben den Rhythmus der Verlangsamung.</h2>
                 <div class="manifesto-accent"></div>
                 <p class="manifesto-summary">
@@ -1119,7 +1209,7 @@
       </div>
       <div class="pcards">
         <div class="pcard tilt-card">
-          <div class="pcard-img"><img src="./images/Hauptbanner-medi-1920-1080.jpg" alt="LOOM Schafwollteppich mediterran" loading="lazy" decoding="async"></div>
+          <div class="pcard-img"><img src="./images/opt/Hauptbanner-medi-1920-1080.jpg" alt="LOOM Schafwollteppich mediterran" loading="lazy" decoding="async"></div>
           <div class="pcard-body">
             <div class="ptag">Hero Product</div>
             <h3 class="d-m pname">Schafwoll&shy;teppich</h3>
@@ -1133,7 +1223,7 @@
           </div>
         </div>
         <div class="pcard tilt-card">
-          <div class="pcard-img"><img src="./images/loom-interior-mediteran-ausgang.jpg" alt="LOOM Walkpatschen mediterran" loading="lazy" decoding="async"></div>
+          <div class="pcard-img"><img src="./images/opt/loom-interior-mediteran-ausgang.jpg" alt="LOOM Walkpatschen mediterran" loading="lazy" decoding="async"></div>
           <div class="pcard-body">
             <div class="ptag">Halo Carrier</div>
             <h3 class="d-m pname">Walk&shy;patschen</h3>
@@ -1158,14 +1248,14 @@
             </ul>
           </div>
           <div class="pcard-img" style="border-radius: 4px; border: 1px solid var(--stone);">
-             <img src="./images/loom-warmes-zimmer-banner.png" alt="LOOM Konfigurator Preview" loading="lazy" decoding="async">
+             <img src="./images/opt/loom-warmes-zimmer-banner.jpg" alt="LOOM Konfigurator Preview" loading="lazy" decoding="async">
           </div>
         </div>
       </div>
       
       <div class="market-images">
-        <div class="market-img-wrap"><img src="./images/loom-interior-mediteran-nacht.png" alt="LOOM Esszimmer mediterran" loading="lazy" decoding="async"></div>
-        <div class="market-img-wrap"><img src="./images/loom-interior-mediteran-Esszimmer.png" alt="LOOM Teppich Esszimmer" loading="lazy" decoding="async"></div>
+        <div class="market-img-wrap"><img src="./images/opt/loom-interior-mediteran-nacht.jpg" alt="LOOM Esszimmer mediterran" loading="lazy" decoding="async"></div>
+        <div class="market-img-wrap"><img src="./images/opt/loom-interior-mediteran-Esszimmer.jpg" alt="LOOM Teppich Esszimmer" loading="lazy" decoding="async"></div>
       </div>
     </div>
   </section>
@@ -1256,8 +1346,8 @@
       <p class="body c-muted" style="max-width:500px;margin-bottom:56px;">Diese Zielgruppe kauft keine Produkte — sie kauft Bedeutung.</p>
 
       <div class="target-images">
-        <div class="target-img"><img src="./images/loom-interior-mediteran-zimmer.png" alt="LOOM Schlafzimmer mediterran" loading="lazy" decoding="async"><p class="img-caption">Der Conscious Aesthete</p></div>
-        <div class="target-img"><img src="./images/loom-interior-mediteran-zimmer-2.png" alt="LOOM Schlafzimmer mediterran 2" loading="lazy" decoding="async"></div>
+        <div class="target-img"><img src="./images/opt/loom-interior-mediteran-zimmer.jpg" alt="LOOM Schlafzimmer mediterran" loading="lazy" decoding="async"><p class="img-caption">Der Conscious Aesthete</p></div>
+        <div class="target-img"><img src="./images/opt/loom-interior-mediteran-zimmer-2.jpg" alt="LOOM Schlafzimmer mediterran 2" loading="lazy" decoding="async"></div>
       </div>
 
       <div class="zg-cards">
@@ -1272,7 +1362,7 @@
           <p class="lbl c-accent" style="margin-bottom:30px;">Psychografie</p>
           <div class="zg-row"><span class="zg-key">Haltung</span><span class="zg-val">Quiet Luxury — Status durch Kuratierung</span></div>
           <div class="zg-row"><span class="zg-key">Konsum</span><span class="zg-val">Kauft weniger, kauft besser</span></div>
-          <div class="zg-row"><span class="zg-key">Medien</span><span class="zg-val">Monocle, Architectural Digest</span></div>
+          <div class="zg-row"><span class="zg-key">Medien</span><span class="zg-val">Instagram, Pinterest</span></div>
           <div class="zg-row"><span class="zg-key">Aversion</span><span class="zg-val">Verabscheut Fast-Furniture &amp; Greenwashing</span></div>
         </div>
       </div>
@@ -1336,7 +1426,7 @@
       <p class="lbl c-accent kicker" style="margin-bottom:18px;" data-scramble>Marketing-Strategie.</p>
       <h2 class="d-m c-cream" style="margin-bottom:22px;">Der «Halo-Effekt».</h2>
       <div class="halo-visual">
-        <img src="./images/loom-interior-mediteran.png" alt="LOOM warmes Zimmer Abendlicht" loading="lazy" decoding="async" class="halo-image">
+        <img src="./images/opt/loom-interior-mediteran.jpg" alt="LOOM warmes Zimmer Abendlicht" loading="lazy" decoding="async" class="halo-image">
       </div>
       <p class="body c-silver halo-lead">
         Wie verkauft man Walkpatschen für €60 an eine anspruchsvolle Zielgruppe?
@@ -1413,12 +1503,31 @@
     <div class="bg-image" id="closing-bg" aria-hidden="true"></div>
     <span class="bg-gl closing-bg-gl" aria-hidden="true">L</span>
     <div class="inner" style="position:relative;z-index:2;width:100%;padding:var(--pad-h);">
-      <div class="clip"><img class="loom-logo closing-logo" src="./images/Logo-loom-stepper.png" alt="LOOM" id="clt"></div>
+      <div class="clip"><img class="loom-logo closing-logo" src="./images/opt/Logo-loom-stepper.png" alt="LOOM" id="clt" loading="lazy"></div>
       <div class="clip"><h3 class="d-m c-accent" id="clq" style="margin-top:26px;margin-bottom:34px;">Fragen?</h3></div>
       <p class="body c-silver" id="clth" style="max-width:460px;">Vielen Dank für die Aufmerksamkeit.</p>
+
+      <div class="closing-contact" id="cl-contact">
+        <span class="contact-item"><span class="ci-ico">Kontakt</span>Finn Kruetschnigg</span>
+        <a class="contact-item" href="mailto:finnkrue@icloud.com"><span class="ci-ico">Mail</span>finnkrue@icloud.com</a>
+        <a class="contact-item" href="tel:+436602333746"><span class="ci-ico">Tel</span>+43&nbsp;660&nbsp;2333&nbsp;746</a>
+      </div>
+
+      <a class="shop-cta" id="cl-shop" href="https://shf6dsifatyv.c01-15.plentymarkets.com/?CallFromAdmin=de610938d38275156ba774ce601907850429f97a" target="_blank" rel="noopener">Zum Online-Shop <span class="arrow">→</span></a>
     </div>
     <p class="closing-credit">LOOM · 2026</p>
   </section>
+
+  <div class="glossary-modal" id="glossary" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="gloss-title">
+    <div class="glossary-backdrop" data-gloss-close></div>
+    <div class="glossary-card" role="document">
+      <button class="glossary-close" data-gloss-close aria-label="Schließen" type="button">&times;</button>
+      <span class="glossary-eyebrow">Glossar</span>
+      <h3 class="glossary-title" id="gloss-title"></h3>
+      <div class="glossary-accent"></div>
+      <p class="glossary-def" id="gloss-def"></p>
+    </div>
+  </div>
 
   <script>
   'use strict';
@@ -1996,8 +2105,108 @@
     gsap.to('#closing-bg', { scale:1, duration:2, ease:'power2.out', scrollTrigger:{ trigger:'#closing', start:'top 80%', once:true } });
     gsap.from('#clt', { yPercent:115, duration:1.6, ease:'power3.out', scrollTrigger:{ trigger:'#closing', start:'top 78%' } });
     gsap.from('#clq', { yPercent:115, duration:1.3, delay:.2, ease:'power3.out', scrollTrigger:{ trigger:'#closing', start:'top 78%' } });
-    gsap.from(['#clth', '.closing-credit'], { opacity:0, y:20, duration:1, stagger:.18, ease:'power2.out', scrollTrigger:{ trigger:'#closing', start:'top 74%' } });
+    gsap.from(['#clth', '#cl-contact', '#cl-shop', '.closing-credit'], { opacity:0, y:20, duration:1, stagger:.14, ease:'power2.out', scrollTrigger:{ trigger:'#closing', start:'top 74%' } });
   });
+
+  /* ────────── GLOSSAR — Fachwörter erklären ────────── */
+  (function glossary(){
+    const modal = $('#glossary');
+    if (!modal) return;
+    const titleEl = $('#gloss-title');
+    const defEl   = $('#gloss-def');
+
+    const GLOSSARY = {
+      'Quiet Luxury': 'Leiser Luxus. Status entsteht nicht durch Logos oder Prunk, sondern durch Material, Verarbeitung und bewusste Zurückhaltung. Wer es erkennt, gehört dazu.',
+      'Eco-Luxury': 'Die Verbindung aus kompromissloser Nachhaltigkeit und echtem Premium-Anspruch — schön und ehrlich zugleich. Genau hier positioniert sich LOOM.',
+      'Conscious Aesthete': '„Der bewusste Ästhet." LOOMs Zielgruppe: Menschen, die weniger, aber besser kaufen und in Produkten Bedeutung statt Masse suchen.',
+      'Halo Carrier': 'Das Einstiegsprodukt (die Walkpatschen), das den Glanz des Hero-Products in eine niedrigere Preisklasse „trägt" und erste Berührung mit der Marke ermöglicht.',
+      'Halo-Effekt': 'Ein begehrtes Leuchtturm-Produkt strahlt auf die gesamte Marke ab und macht auch günstigere Produkte begehrenswert.',
+      'Halo-Objekt': 'Das begehrte Referenzprodukt (der Teppich), das den Qualitätsmaßstab setzt und die Strahlkraft für die ganze Marke erzeugt.',
+      'Hero Product': 'Das Flaggschiff-Produkt einer Marke. Es erzeugt Begehren und definiert den Qualitätsanspruch — es muss nicht von jedem gekauft, aber von jedem begehrt werden.',
+      'Blue Ocean': 'Ein noch unbesetzter Markt ohne direkte Konkurrenz. Statt im „roten Ozean" um Preise zu kämpfen, schafft man einen eigenen, klaren Raum.',
+      'Customer Lifetime Value': 'CLV — der gesamte Wert, den ein Kunde über die ganze Beziehung hinweg bringt, nicht nur beim ersten Kauf. Vertrauen steigert ihn, Rabatte senken ihn.',
+      'Attitude-Behaviour-Gap': 'Die Lücke zwischen dem, was Menschen sagen (bewusst konsumieren) und dem, was sie tatsächlich kaufen (oft das Billigste).',
+      'IKEA-Effekt': 'Wer ein Produkt selbst mitgestaltet, schätzt es höher und bindet sich emotional stärker daran — der finale Preis rückt in den Hintergrund.',
+      'Frictionless Luxury': 'Reibungsloser Luxus: sofortige Transparenz und Einfachheit (z. B. ein Live-Preis im Konfigurator), ohne Wartezeit oder Hürden.',
+      'Co-Creation': 'Der Kunde gestaltet sein Produkt mit — Farbe, Maß, Details — und macht es so zu einem persönlichen Unikat.',
+      'CAGR': 'Compound Annual Growth Rate: die durchschnittliche jährliche Wachstumsrate eines Marktes über einen Zeitraum.',
+      'Lanolin': 'Das natürliche Wollfett der Schafschur. Es macht die Wolle wasserabweisend, weich und selbstreinigend — reine Natur ohne Chemie.',
+      'Schurwolle': 'Wolle vom lebenden Schaf, frisch geschoren — die höchste Qualitätsstufe, im Gegensatz zu recycelter oder gemischter Wolle.',
+      'Walkpatschen': 'Traditionell nass gewalkte Hausschuhe aus reiner Schurwolle. LOOMs niederschwelliges Einstiegsprodukt in die Markenwelt.',
+      'Greenwashing': 'Vorgetäuschte Nachhaltigkeit: Marketing, das ein Produkt umweltfreundlicher erscheinen lässt, als es tatsächlich ist.',
+      'Fast-Furniture': 'Billig und schnell produzierte Möbel und Textilien für kurzlebige Trends — das Gegenteil der LOOM-Philosophie.',
+      'Funnel': 'Der „Trichter" der Customer Journey: vom ersten Kontakt oben bis zu Kauf und Weiterempfehlung unten.',
+      'Persona': 'Ein greifbares Gesicht der Marke (Clemens). Vertrauen entsteht durch Menschen, nicht durch Logos.',
+      'Archetyp': 'Ein universelles Rollenbild (z. B. „Der Schöpfer"), das eine Marke emotional auflädt und sofort verständlich macht.',
+      'Watch-Time': 'Die Sehdauer eines Videos. Eine hohe Watch-Time ist ein starkes Signal, das Social-Media-Algorithmen mit Reichweite belohnen.',
+    };
+
+    const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const EXCLUDE = 'h1,h2,h3,h4,button,a,.clip,.reveal-line,[data-scramble],#mq1,#mq2,' +
+      '.ges-title,.manifesto-headline,.zg-intro,.marquee,#loader,.sidebar,.mobile-nav,' +
+      '.cursor-label,.bg-gl,.stat,.bb-num,.preis-bg-num,.loader-count,.monolith-name,' +
+      '.term,.glossary-modal,.pname';
+
+    const used = new Set();
+    const terms = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length);
+
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        if (node.parentElement && node.parentElement.closest(EXCLUDE)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    nodes.forEach(node => {
+      for (const term of terms) {
+        if (used.has(term)) continue;
+        const re = new RegExp('(^|[^\\wäöüÄÖÜß])(' + esc(term) + ')(?=[^\\wäöüÄÖÜß]|$)');
+        const m = node.nodeValue.match(re);
+        if (!m) continue;
+        used.add(term);
+        const matchStart = m.index + m[1].length;
+        const after = node.splitText(matchStart);
+        after.nodeValue = after.nodeValue.slice(term.length);
+        const btn = document.createElement('button');
+        btn.className = 'term';
+        btn.type = 'button';
+        btn.textContent = term;
+        btn.dataset.def = GLOSSARY[term];
+        node.parentNode.insertBefore(btn, after);
+        break;
+      }
+    });
+
+    let lastFocus = null;
+    const open = (title, def) => {
+      titleEl.textContent = title;
+      defEl.textContent = def;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      lastFocus = document.activeElement;
+      if (lenis) lenis.stop();
+      document.body.style.overflow = 'hidden';
+    };
+    const close = () => {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      if (lenis) lenis.start();
+      document.body.style.overflow = '';
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    };
+
+    document.addEventListener('click', e => {
+      const t = e.target.closest('.term');
+      if (t) { e.preventDefault(); open(t.textContent, t.dataset.def); return; }
+      if (e.target.closest('[data-gloss-close]')) close();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) close();
+    });
+  })();
 
   /* ────────── RESIZE / FONTS / LOAD ────────── */
   let rt;
