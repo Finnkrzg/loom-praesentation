@@ -290,8 +290,9 @@
     .ms-btn:not(.active):hover { color: var(--cream); }
 
     /* Talk/Detail Sichtbarkeit — voller Text bleibt immer im DOM erhalten */
-    .talk-only { display: none; }
-    body.mode-talk .talk-only { display: block; }
+    /* Sichtbarkeit body-gebunden lösen, damit sichtbare Elemente ihr natürliches
+       display behalten (z. B. .kb-list = flex) und nichts doppelt erscheint. */
+    body:not(.mode-talk) .talk-only { display: none; }
     body.mode-talk .detail-only { display: none; }
 
     /* Stichwort-Listen für den Vortragsmodus */
@@ -1475,17 +1476,28 @@
       <div class="zg-cards">
         <div class="zg-card tilt-card">
           <p class="lbl c-accent" style="margin-bottom:30px;">Demografie</p>
-          <div class="zg-row"><span class="zg-key">Alter</span><span class="zg-val">35 – 65 Jahre</span></div>
-          <div class="zg-row"><span class="zg-key">Einkommen</span><span class="zg-val">Hoch, häufig Immobilienbesitz</span></div>
-          <div class="zg-row"><span class="zg-key">Berufe</span><span class="zg-val">Architekt:innen, Ärzt:innen, Agenturinhaber</span></div>
-          <div class="zg-row"><span class="zg-key">Geografie</span><span class="zg-val">Wien, München, Zürich, Hamburg</span></div>
+          <div class="zg-row detail-only"><span class="zg-key">Alter</span><span class="zg-val">35 – 65 Jahre</span></div>
+          <div class="zg-row detail-only"><span class="zg-key">Einkommen</span><span class="zg-val">Hoch, häufig Immobilienbesitz</span></div>
+          <div class="zg-row detail-only"><span class="zg-key">Berufe</span><span class="zg-val">Architekt:innen, Ärzt:innen, Agenturinhaber</span></div>
+          <div class="zg-row detail-only"><span class="zg-key">Geografie</span><span class="zg-val">Wien, München, Zürich, Hamburg</span></div>
+          <ul class="kb-list talk-only">
+            <li>35–65 J., hohes Einkommen</li>
+            <li>Architekt:innen, Ärzt:innen</li>
+            <li>Wien, München, Zürich</li>
+          </ul>
         </div>
         <div class="zg-card tilt-card">
           <p class="lbl c-accent" style="margin-bottom:30px;">Psychografie</p>
-          <div class="zg-row"><span class="zg-key">Haltung</span><span class="zg-val">Quiet Luxury — Status durch Kuratierung</span></div>
-          <div class="zg-row"><span class="zg-key">Konsum</span><span class="zg-val">Kauft weniger, kauft besser</span></div>
-          <div class="zg-row"><span class="zg-key">Medien</span><span class="zg-val">Instagram, Pinterest</span></div>
-          <div class="zg-row"><span class="zg-key">Aversion</span><span class="zg-val">Verabscheut Fast-Furniture &amp; Greenwashing</span></div>
+          <div class="zg-row detail-only"><span class="zg-key">Haltung</span><span class="zg-val">Quiet Luxury — Status durch Kuratierung</span></div>
+          <div class="zg-row detail-only"><span class="zg-key">Konsum</span><span class="zg-val">Kauft weniger, kauft besser</span></div>
+          <div class="zg-row detail-only"><span class="zg-key">Medien</span><span class="zg-val">Instagram, Pinterest</span></div>
+          <div class="zg-row detail-only"><span class="zg-key">Aversion</span><span class="zg-val">Verabscheut Fast-Furniture &amp; Greenwashing</span></div>
+          <ul class="kb-list talk-only">
+            <li>Quiet Luxury</li>
+            <li>Kauft weniger, besser</li>
+            <li>Instagram, Pinterest</li>
+            <li>Contra Fast-Furniture</li>
+          </ul>
         </div>
       </div>
 
