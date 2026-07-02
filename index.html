@@ -170,19 +170,19 @@
     ═══════════════════════════════════════════════════════════ */
     .cursor-dot {
       position: fixed; width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent); pointer-events: none; z-index: 9990;
+      background: var(--accent); pointer-events: none; z-index: 11000;
       transform: translate(-50%, -50%);
       transition: width .25s, height .25s, opacity .25s, background .25s;
       mix-blend-mode: difference;
     }
     .cursor-ring {
       position: fixed; width: 36px; height: 36px; border-radius: 50%;
-      border: 1px solid rgba(196,168,130,.35); pointer-events: none; z-index: 9989;
+      border: 1px solid rgba(196,168,130,.35); pointer-events: none; z-index: 10999;
       transform: translate(-50%, -50%);
       transition: width .3s var(--ease-out), height .3s var(--ease-out), border-color .3s;
     }
     .cursor-label {
-      position: fixed; z-index: 9991; pointer-events: none;
+      position: fixed; z-index: 11001; pointer-events: none;
       font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
       color: var(--black); background: var(--accent);
       padding: 4px 9px; border-radius: 2px;
@@ -542,7 +542,7 @@
     #konkurrenz-outer { background: var(--charcoal); overflow: hidden; }
     #konkurrenz-pin { height: 100vh; display: flex; flex-direction: column; padding: var(--pad-v) var(--pad-h) 0; box-sizing: border-box; overflow: hidden; }
     .konk-hdr { flex-shrink: 0; margin-bottom: 48px; }
-    #konkurrenz-track { display: flex; gap: 24px; will-change: transform; flex: 1; align-items: stretch; padding-bottom: 60px; }
+    #konkurrenz-track { display: flex; gap: 24px; will-change: transform; flex: 1; align-items: stretch; padding-bottom: 60px; position: relative; }
     .comp-card { width: min(820px, 76vw); flex-shrink: 0; background: var(--off-black); padding: 50px 46px; border-top: 2px solid var(--stone); position: relative; transition: border-color .5s, background .5s; }
     .comp-card.k-loom-card { background: var(--dark); }
     .comp-card.illuminated { border-top-color: var(--accent); background: rgba(196,168,130,.07); }
@@ -654,7 +654,7 @@
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
-      overflow: hidden;
+      overflow: clip;
     }
     .cinematic-overlay {
       position: absolute; inset: 0; z-index: 1; pointer-events: none;
@@ -769,14 +769,17 @@
       display: flex; align-items: center; justify-content: center; padding: 24px;
       opacity: 0; visibility: hidden;
       transition: opacity .4s var(--ease-out), visibility .4s;
+      cursor: auto;
     }
     .glossary-modal.open { opacity: 1; visibility: visible; }
     .glossary-backdrop {
       position: absolute; inset: 0; background: rgba(6,6,5,.74);
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      cursor: pointer;
     }
     .glossary-card {
       position: relative; z-index: 2; width: min(520px, 100%);
+      cursor: auto;
       background: rgba(15,14,13,.94);
       border: 1px solid rgba(255,255,255,.07); border-top: 2px solid var(--accent);
       box-shadow: 0 50px 120px rgba(0,0,0,.7);
@@ -2034,10 +2037,15 @@
       const getSnapPoints = () => {
         const cards = gsap.utils.toArray('.comp-card');
         const maxScroll = dist();
-        if (maxScroll <= 0) return [0, 1];
+        if (maxScroll <= 0 || !cards.length) return [0, 1];
+        // offsetLeft is measured from the offsetParent (not the track), so we
+        // subtract the first card's offset to get each card's position *within*
+        // the track. Otherwise every snap point is shifted by the pin padding
+        // and the cards never align cleanly to the left edge.
+        const base = cards[0].offsetLeft;
         return cards.map((card, i) => {
           if (i === cards.length - 1) return 1;
-          return gsap.utils.clamp(0, 1, card.offsetLeft / maxScroll);
+          return gsap.utils.clamp(0, 1, (card.offsetLeft - base) / maxScroll);
         });
       };
 
