@@ -326,6 +326,11 @@
     .kicker::before { content:''; width:32px; height:1px; background:var(--accent-dark); display:inline-block; }
     .reveal-line { display: block; overflow: hidden; }
     .reveal-line > * { display: block; will-change: transform; }
+    /* Buchstabenweiser 3D-Reveal der Hero-Headline.
+       .hero-word verhindert Umbrüche mitten im Wort und liefert die
+       perspective für die rotateX der Buchstaben (direkte Kinder). */
+    .hero-word { display: inline-block; white-space: nowrap; perspective: 700px; }
+    .hero-char { display: inline-block; will-change: transform; transform-origin: 50% 100%; backface-visibility: hidden; }
 
     /* ═══════════════════════════════════════════════════════════
        MARQUEE
@@ -961,6 +966,8 @@
       #konkurrenz-pin { height: auto; overflow: visible; }
       #konkurrenz-track { flex-direction: column; width: 100%; gap: 2px; }
       .comp-card { width: 100%; }
+      /* Auf Mobile sind die Karten vertikal gestapelt → Hinweis wäre irreführend */
+      .konk-hint { display: none; }
       .scroll-cue { left: var(--pad-h); }
       .closing-logo { max-width: min(220px, 72vw); }
       .target-img { height: 260px; }
@@ -1008,6 +1015,8 @@
       .mobile-bar { display: block; }
       .thread { display: none; }
       #cover { padding-top: 62px; }
+      /* iPadOS rendert background-attachment: fixed fehlerhaft */
+      .loom-cinematic-manifesto { background-attachment: scroll; }
     }
     @media (max-width: 480px) {
       :root { --pad-h: 20px; --pad-v: 68px; }
@@ -1682,6 +1691,7 @@
      3) Desktop-Maus     → Lenis
   ────────── */
   let lenis = null;
+  let playCoverIntro = null; // wird im Cover-Setup gesetzt, vom Preloader abgespielt
 
   const isCoarsePrimary = window.matchMedia('(pointer: coarse)').matches;
 
@@ -1822,9 +1832,10 @@
       .to('#loader-sub',   { opacity: 1, duration: .8, ease: 'power2.out' }, .7)
       .to({}, { duration: .25 });
 
-    // Fallback: Lenis nach max. 5s garantiert freigeben
+    // Fallback: Lenis + Cover-Intro nach max. 5s garantiert freigeben
     setTimeout(() => {
       if (lenis && lenis.isStopped) { lenis.start(); lenis.resize(); ScrollTrigger.refresh(); }
+      if (playCoverIntro) { playCoverIntro(); playCoverIntro = null; }
     }, 5000);
   })();
 
@@ -1905,9 +1916,14 @@
       ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
       requestAnimationFrame(loop);
     })();
-    $$('a, button, .dot, .tilt-card, .comp-card').forEach(el => {
-      el.addEventListener('mouseenter', () => document.body.classList.add('c-hover'));
-      el.addEventListener('mouseleave', () => document.body.classList.remove('c-hover'));
+    // Delegation statt fester Listener: erfasst auch dynamisch erzeugte
+    // Elemente wie die Glossar-Begriffe (.term)
+    const HOVERABLE = 'a, button, .dot, .tilt-card, .comp-card';
+    document.addEventListener('mouseover', e => {
+      if (e.target.closest(HOVERABLE)) document.body.classList.add('c-hover');
+    });
+    document.addEventListener('mouseout', e => {
+      if (e.target.closest(HOVERABLE)) document.body.classList.remove('c-hover');
     });
   })();
 
@@ -2005,7 +2021,12 @@
   gsap.to('#thread-fill', { scaleX:1, ease:'none', scrollTrigger:{ trigger:'body', start:'top top', end:'bottom bottom', scrub:true } });
 
   /* ────────── REVEAL HELPER ────────── */
-  function startReveal(){ ScrollTrigger.refresh(); }
+  // Wird vom Preloader aufgerufen, sobald der Vorhang aufgeht — erst dann
+  // startet das Cover-Intro (vorher lief es unsichtbar hinter dem Loader ab).
+  function startReveal(){
+    ScrollTrigger.refresh();
+    if (playCoverIntro) { playCoverIntro(); playCoverIntro = null; }
+  }
 
   /* ────────── COUNTER — Chrome-safe (proxy bound to element) ────────── */
   function initCounter(id, options = {}) {
@@ -2055,21 +2076,49 @@
   const mm = gsap.matchMedia();
   mm.add('(prefers-reduced-motion: no-preference)', () => {
 
-    /* COVER */
-    const covTl = gsap.timeline({ defaults:{ ease:'power3.out' }, delay:.2 });
+    /* COVER — buchstabenweiser 3D-Reveal + Ken-Burns-Zoom, getimed auf den Vorhang */
+    const splitChars = el => {
+      const words = el.textContent.split(' ');
+      el.textContent = '';
+      words.forEach((word, wi) => {
+        const w = document.createElement('span');
+        w.className = 'hero-word';
+        for (const ch of word) {
+          const s = document.createElement('span');
+          s.className = 'hero-char';
+          s.textContent = ch;
+          w.appendChild(s);
+        }
+        el.appendChild(w);
+        if (wi < words.length - 1) el.appendChild(document.createTextNode(' '));
+      });
+      return el.querySelectorAll('.hero-char');
+    };
+    const chars1 = splitChars($('#hl1'));
+    const chars2 = splitChars($('#hl2'));
+
+    // immediateRender: alle Startzustände sofort setzen, damit hinter dem
+    // Loader nichts kurz im Endzustand aufblitzt, bevor die Timeline spielt.
+    const covTl = gsap.timeline({ paused: true, defaults:{ ease:'power4.out', immediateRender: true } });
     covTl
-      .from(['#hl1','#hl2'], { yPercent:115, duration:1.3, stagger:.14 })
-      .from('#cov-lbl', { opacity:0, y:18, duration:.9 }, '-=.8')
-      .from('#cov-sub', { opacity:0, y:18, duration:.9 }, '-=.7')
-      .from('.cover-qr', { opacity:0, x:20, duration:.9 }, '-=.6')
-      .from('.scroll-cue', { opacity:0, duration:.7 }, '-=.4');
+      .fromTo('#cover-bg', { scale: 1.14 }, { scale: 1, duration: 2.8, ease: 'power2.out' }, 0)
+      .from(chars1, { yPercent: 130, rotateX: -80, opacity: 0, duration: 1.15, stagger: .045 }, .05)
+      .from(chars2, { yPercent: 130, rotateX: -80, opacity: 0, duration: 1.15, stagger: .045 }, .38)
+      .from('#cov-lbl', { opacity:0, y:18, duration:.9, ease:'power3.out' }, .95)
+      .from('#cov-sub', { opacity:0, y:18, duration:.9, ease:'power3.out' }, 1.1)
+      .from('.cover-qr', { opacity:0, x:20, duration:.9, ease:'power3.out' }, 1.2)
+      .from('.scroll-cue', { opacity:0, duration:.7, ease:'power3.out' }, 1.35);
+    playCoverIntro = () => covTl.play();
 
     gsap.to('#cover-bg', { yPercent:22, ease:'none', scrollTrigger:{ trigger:'#cover', start:'top top', end:'bottom top', scrub:true } });
 
     /* PROBLEM */
     gsap.from('.prob-left', { x:-50, opacity:0, duration:1.3, ease:'power2.out', scrollTrigger:{ trigger:'#problem', start:'top 80%' } });
     gsap.from('.prob-right > *', { y:50, opacity:0, duration:1.1, stagger:.16, ease:'power2.out', scrollTrigger:{ trigger:'#problem', start:'top 78%' } });
-    gsap.from('.rule', { scaleX:0, transformOrigin:'left', duration:1.5, ease:'power3.inOut', scrollTrigger:{ trigger:'.rule', start:'top 85%' } });
+    /* Jede Linie einzeln triggern — sonst animieren alle beim ersten Auftauchen gleichzeitig */
+    $$('.rule').forEach(rule => {
+      gsap.from(rule, { scaleX:0, transformOrigin:'left', duration:1.5, ease:'power3.inOut', scrollTrigger:{ trigger:rule, start:'top 85%' } });
+    });
     initCounter('s10', {
       end: 73,
       decimals: 0,
